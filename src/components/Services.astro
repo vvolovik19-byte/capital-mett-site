@@ -1,0 +1,31 @@
+---
+import site from '../data/site.json';
+const services = [
+  { n: '01', title: 'Самовывоз лома', href: '/uslugi/samovyvoz', more: 'Подробнее о вывозе',
+    text: 'Приедем на объект, взвесим и вывезем лом. Газель для небольших партий, манипулятор для крупных. Условия вывоза — по договорённости.' },
+  { n: '02', title: 'Демонтаж металло­конструкций', href: '/uslugi/demontazh-metallokonstruktsij', more: 'Подробнее о демонтаже',
+    text: 'Разберём, порежем и вывезем металлоконструкции от 1 тонны. Своя бригада и техника, работа по договору.' },
+  { n: '03', title: 'Аренда техники', href: '/uslugi/arenda-tekhniki-i-oborudovaniya', more: 'Техника и условия',
+    text: 'Газель, МАЗ мультилифт и МАЗ манипулятор с водителем из собственного автопарка. Посменно или на долгий срок.' },
+  { n: '04', title: 'Партии для предприятий', href: site.phone.href, more: 'Обсудить партию по телефону', goal: 'phone',
+    text: 'Принимаем лом партиями с производств и строек. Договор и безналичная оплата на счёт организации. Цену назовём по телефону.' },
+];
+---
+<section class="section" id="uslugi">
+  <div class="wrap">
+    <header class="section__head" data-reveal>
+      <h2>Услуги для компаний</h2>
+      <p>Забираем лом с объекта, разбираем конструкции и даём технику с водителем.</p>
+    </header>
+    <ol class="services">
+      {services.map((s) => (
+        <li class="service" data-reveal>
+          <span class="service__n" aria-hidden="true">{s.n}</span>
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+          <a class="service__link" href={s.href} data-goal={s.goal}>{s.more}</a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

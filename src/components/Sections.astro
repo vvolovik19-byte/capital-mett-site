@@ -1,0 +1,103 @@
+---
+import site from '../data/site.json';
+import yards from '../data/yards.json';
+import LeadForm from './LeadForm.astro';
+import Chat from './Chat.astro';
+const steps = [
+  ['Вы звоните или оставляете заявку', 'Рассказываете, что и сколько сдаёте.'],
+  ['Выезжаем на объект', 'Если партия крупная или нужен демонтаж.'],
+  ['Оцениваем лом и называем цену', 'Если нужно, заключаем договор.'],
+  ['Вывозим или демонтируем', 'Грузим своей техникой и взвешиваем.'],
+  ['Платим полную стоимость', 'Переводом на карту или на счёт организации.'],
+];
+---
+<section class="section" id="kak-rabotaem">
+  <div class="wrap">
+    <header class="section__head" data-reveal>
+      <h2>Как мы работаем</h2>
+    </header>
+    <ol class="steps">
+      {steps.map(([t, d], i) => (
+        <li data-reveal><span class="steps__n" aria-hidden="true">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>
+      ))}
+    </ol>
+    <div class="photo-ask" data-reveal>
+      <div>
+        <h3>Пришлите фото лома — оценим заранее</h3>
+        <p>Сфотографируйте металл и отправьте нам в Telegram или WhatsApp. Подскажем, что это за лом, и назовём примерную цену до приезда.</p>
+      </div>
+      <Chat variant="button" />
+    </div>
+  </div>
+</section>
+
+<section class="section section--concrete" id="o-kompanii">
+  <div class="wrap about">
+    <div class="about__text" data-reveal>
+      <h2>О компании</h2>
+      <p class="about__lead">{site.legalName} принимает металлолом, макулатуру и пластик в Москве и Московской области с {site.since} года.</p>
+      <p>У нас семь площадок, собственный автопарк и бригада демонтажа. Принимаем чёрный лом (сталь, чугун, оцинковку, стружку) и цветной (медь, латунь, алюминий, нержавейку, свинец, цинк, аккумуляторы).</p>
+      <p>Работаем по лицензии на заготовку, хранение, переработку и реализацию лома чёрных и цветных металлов. С компаниями заключаем договор и платим на счёт.</p>
+      <dl class="facts">
+        <div><dt>{site.since}</dt><dd>год основания</dd></div>
+        <div><dt>7</dt><dd>площадок приёма</dd></div>
+        <div><dt>24/7</dt><dd>принимаем лом</dd></div>
+      </dl>
+      <a class="textlink" href="/about">Реквизиты и лицензии</a>
+    </div>
+    <div class="about__photos" data-reveal>
+      <div class="ph ph--tall"><span>Фото: площадка, кран с магнитом</span></div>
+      <div class="ph"><span>Фото: взвешивание на весах</span></div>
+    </div>
+    <div class="clients" data-reveal>
+      <h3>Нам доверяют</h3>
+      <ul>
+        {[1, 2, 3, 4].map((i) => <li><span>Логотип клиента {i}</span></li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="channel" id="kanal">
+  <div class="wrap channel__in" data-reveal>
+    <div>
+      <h2>Цены меняются. Следите в Telegram-канале</h2>
+      <p>Пишем в канале, когда меняются цены на лом, и рассказываем новости площадок.</p>
+    </div>
+    <a class="btn btn--white btn--big" href={site.telegram} target="_blank" rel="noopener" data-goal="channel">Открыть канал @capitalmett</a>
+  </div>
+</section>
+
+<section class="cta" id="zayavka">
+  <div class="cta__media" aria-hidden="true">
+    {site.ctaVideo
+      ? <video autoplay muted loop playsinline preload="none" poster={site.ctaVideo.poster}><source src={site.ctaVideo.src} type="video/mp4" /></video>
+      : <div class="hero__sheen"></div>}
+  </div>
+  <div class="wrap cta__in">
+    <div class="cta__text" data-reveal>
+      <h2>Есть партия металла? Позвоните</h2>
+      <p>Спросим, что и сколько вы сдаёте, и назовём цену за один звонок.</p>
+      <a class="cta__phone" href={site.phone.href} data-goal="phone">{site.phone.text}</a>
+      <p class="cta__sub">Круглосуточно. Или оставьте телефон — перезвоним сами.</p>
+    </div>
+    <div class="cta__form" data-reveal>
+      <LeadForm id="lead" submit="Перезвоните мне" />
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight" id="vakansii">
+  <div class="wrap jobs">
+    <header data-reveal>
+      <h2>Вакансии</h2>
+      <p>Ищем людей на площадки и в автопарк. Звоните по номеру вакансии.</p>
+    </header>
+    <ul>
+      {site.jobs.map((j) => (
+        <li data-reveal><h3>{j.title}</h3><a href={j.href}>{j.phone}</a></li>
+      ))}
+    </ul>
+  </div>
+</section>
+

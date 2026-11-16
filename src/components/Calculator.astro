@@ -1,0 +1,58 @@
+---
+import site from '../data/site.json';
+import calc from '../data/calculator.json';
+import { calculable, categories, categoryName, rub } from '../data/prices';
+interface Props { phone?: { text: string; href: string }; title?: string }
+const { phone = site.phone, title = 'Сколько заплатят за ваш лом' } = Astro.props;
+const startCat = 'Цветной металлолом';
+const startItem = calculable.find((p) => p.name === 'Медный лом')!;
+const startKg = 10;
+const data = { items: calculable.map((p) => ({ c: p.category, n: p.name, p: p.price, u: p.unit })), zasor: calc.zasor, negotiable: calc.negotiable };
+---
+<section class="section section--dark" id="kalkulyator">
+  <div class="wrap calc">
+    <header class="calc__head" data-reveal>
+      <h2>{title}</h2>
+      <p>Выберите, что сдаёте, и укажите вес. Сумма примерная.</p>
+      <p class="calc__zasor">В любой партии металла возможен засор: земля, ржавчина, краска, неметаллические части. Его процент определяют при приёмке и обсуждают с вами прямо на площадке.</p>
+    </header>
+    <form class="calc__form" data-calc={JSON.stringify(data)} data-reveal>
+      <fieldset class="seg">
+        <legend>Что сдаёте</legend>
+        {categories.map((c) => (
+          <label><input type="radio" name="cat" value={c} checked={c === startCat} /><span>{categoryName(c)}</span></label>
+        ))}
+      </fieldset>
+      <div class="calc__row">
+        <label class="field">
+          <span>Позиция</span>
+          <select id="calc-item" name="item">
+            {calculable.filter((p) => p.category === startCat).map((p) => (
+              <option value={p.name} selected={p.name === startItem.name}>{p.name} — {rub(p.price as number)} {p.unit}</option>
+            ))}
+          </select>
+        </label>
+        <div class="field field--weight">
+          <label for="calc-weight">Вес</label>
+          <div class="weight">
+            <input id="calc-weight" name="weight" type="number" inputmode="decimal" min="0" step="any" value={startKg} />
+            <div class="seg seg--unit" role="group" aria-label="Единица веса">
+              <label><input type="radio" name="unit" value="kg" checked /><span>кг</span></label>
+              <label><input type="radio" name="unit" value="t" /><span>т</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="calc__result" aria-live="polite">
+        <output id="calc-sum" class="calc__sum" for="calc-item calc-weight">≈ {rub(startKg * (startItem.price as number))} ₽</output>
+        <p id="calc-note" class="calc__note">Точная сумма — после взвешивания и оценки засора на площадке.</p>
+      </div>
+      <div class="calc__actions">
+        <a class="btn btn--accent btn--big" href={phone.href} data-goal="phone-after-calc">
+          <span class="btn__label">Позвонить</span><span class="btn__num">{phone.text}</span>
+        </a>
+        <button class="btn btn--line-light btn--big" type="button" data-open="order">Вызвать машину</button>
+      </div>
+    </form>
+  </div>
+</section>

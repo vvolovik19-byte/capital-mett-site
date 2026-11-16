@@ -1,0 +1,73 @@
+/* Вариант 2: те же цвета и блоки, плюс 3D-металл, бегущая строка цен и объёмные карточки. */
+.hero2 { min-height: clamp(560px, 78vh, 860px); display: flex; flex-direction: column; }
+.hero2 .hero__in { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; justify-content: center; padding-block: clamp(40px, 7vw, 96px); }
+.hero2 .board { position: relative; z-index: 1; backdrop-filter: blur(10px); background: rgba(16, 18, 21, 0.7); }
+.hero2 .hero__media::after { background: linear-gradient(90deg, rgba(22, 24, 27, 0.96) 0%, rgba(22, 24, 27, 0.78) 45%, rgba(22, 33, 56, 0.55) 100%); }
+.hero2__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.hero2 .hero__title-main {
+  font-size: clamp(1.5rem, 4.7vw, 4.25rem);
+  background: linear-gradient(180deg, #ffffff 0%, #e4e9ee 38%, #8f99a4 52%, #cfd6dd 60%, #ffffff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 18px rgba(0, 0, 0, 0.45));
+}
+.hero2 .hero__title-rest, .hero2 .hero__lead { text-shadow: 0 1px 14px rgba(0, 0, 0, 0.6); }
+.hero2 .hero__lead { max-width: 46ch; }
+.hero2 .hero__title { max-width: 56%; }
+.hero2__hint { display: none; margin-top: 22px; font-size: 0.8125rem; color: var(--accent-tint); }
+.has-3d .hero2__hint { display: block; }
+.hero2 .board__cell { transition: background-color 0.2s; cursor: default; }
+.hero2 .board__cell:hover { background: rgba(36, 89, 179, 0.28); }
+.hero2 .board__cell[data-metal='copper'] .board__price b { color: #f0b48a; }
+.hero2 .board__cell[data-metal='brass'] .board__price b { color: #ecd28e; }
+
+/* Бегущая строка со всем прайсом */
+.ticker { overflow: hidden; background: var(--graphite); color: var(--white); border-top: 1px solid var(--line-dark); }
+.ticker__track { display: flex; width: max-content; animation: ticker 70s linear infinite; }
+.ticker:hover .ticker__track { animation-play-state: paused; }
+.ticker ul { display: flex; flex: none; }
+.ticker li { display: flex; align-items: baseline; gap: 10px; padding: 14px 28px; border-right: 1px solid var(--line-dark); white-space: nowrap; font-size: 0.9063rem; }
+.ticker li span { color: rgba(255, 255, 255, 0.7); }
+.ticker li b { font: 500 1.0625rem/1 var(--font-head); font-variant-numeric: tabular-nums; }
+.ticker li i { font-style: normal; font-size: 0.8125rem; color: var(--accent-tint); }
+@keyframes ticker { to { transform: translateX(-50%); } }
+
+/* Услуги: тёмный блок, объёмные карточки */
+.v2 #uslugi { background: var(--graphite); color: var(--white); }
+.v2 #uslugi .section__head p { color: rgba(255, 255, 255, 0.72); }
+.v2 .services { border-top: 0; gap: 12px; }
+.v2 .service, .v2 .service:first-child, .v2 .service:nth-child(odd) {
+  position: relative; overflow: hidden; padding: 28px 24px 30px; border: 1px solid var(--line-dark);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -20%), rgba(63, 125, 240, 0.28), transparent 60%), linear-gradient(160deg, #2c3138, #1f2327);
+  transition: transform 0.18s ease-out, border-color 0.2s; will-change: transform;
+}
+.v2 .service:hover { box-shadow: none; border-color: var(--accent-tint); }
+.v2 .service__n { font: 600 clamp(3.5rem, 6vw, 5.5rem)/0.9 var(--font-head); color: transparent; -webkit-text-stroke: 1px rgba(169, 196, 240, 0.55); margin-bottom: clamp(16px, 3vw, 40px); }
+.v2 .service p { color: rgba(255, 255, 255, 0.74); }
+.v2 .service__link { color: var(--accent-tint); }
+.v2 #uslugi :focus-visible { outline-color: var(--accent-tint); }
+
+/* Шаги: крупные контурные цифры */
+.v2 .steps__n { font-size: clamp(3rem, 5vw, 4.5rem); color: transparent; -webkit-text-stroke: 1.5px var(--accent); }
+
+/* Блок со звонком: шестерни */
+.cta__canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.4; }
+.v2 .cta__in { position: relative; }
+.v2 .cta h2 { font-size: clamp(1.75rem, 4.4vw, 3.5rem); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker { overflow-x: auto; }
+  .ticker__track { animation: none; }
+}
+@media (max-width: 760px) {
+  .hero2 { min-height: 0; }
+  .hero2 .hero__title { max-width: none; }
+  .hero2 .hero__in { padding-block: 170px 24px; justify-content: flex-end; }
+  .hero2 .hero__media::after { background: linear-gradient(180deg, rgba(22, 24, 27, 0.35) 0%, rgba(22, 24, 27, 0.9) 42%); }
+  .hero2__hint { display: none !important; }
+  .ticker li { padding: 12px 18px; }
+  .v2 .services { gap: 10px; }
+  .v2 .service, .v2 .service:first-child, .v2 .service:nth-child(odd) { padding: 20px 18px 22px; border: 1px solid var(--line-dark); }
+  .v2 .service__n { font-size: 3rem; }
+  .v2 .steps__n { font-size: 2.25rem; -webkit-text-stroke-width: 1px; }
+  .cta__canvas { opacity: 0.3; }
+}

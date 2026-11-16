@@ -1,0 +1,21 @@
+---
+import { featured, shortName, rub, updatedText, updatedISO } from '../data/prices';
+interface Props { allHref?: string }
+const { allHref = '/tseny' } = Astro.props;
+---
+<div class="board" aria-label="Цены на приём">
+    <div class="wrap board__in">
+      <ul class="board__list">
+        {featured.map((p) => (
+          <li class="board__cell" data-metal={p.name.startsWith('Мед') ? 'copper' : p.name.startsWith('Латун') ? 'brass' : 'steel'}>
+            <span class="board__name">{shortName(p.name)}</span>
+            <span class="board__price"><b>{rub(p.price as number)}</b> {p.unit}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="board__meta">
+        <span>Цены на <time datetime={updatedISO}>{updatedText}</time></span>
+        <a href={allHref}>Весь прайс</a>
+      </p>
+    </div>
+  </div>

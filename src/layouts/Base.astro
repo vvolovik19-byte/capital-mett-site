@@ -1,0 +1,70 @@
+---
+import '@fontsource-variable/onest/wght.css';
+import '@fontsource-variable/unbounded/wght.css';
+import '../styles/global.css';
+import site from '../data/site.json';
+import yards from '../data/yards.json';
+
+interface Props { title: string; description: string; path?: string; page?: string; extraLd?: object[]; noindex?: boolean }
+const { title, description, path = '/', page = 'home', extraLd = [], noindex = false } = Astro.props;
+const previewMain = import.meta.env.PUBLIC_MAIN_URL ?? '';
+const previewIstra = import.meta.env.PUBLIC_ISTRA_URL ?? '';
+const canonical = new URL(path, site.url).href;
+const isPreview = Boolean(import.meta.env.PUBLIC_PREVIEW);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: site.name,
+  legalName: site.legalName,
+  url: site.url,
+  foundingDate: String(site.since),
+  telephone: site.phone.text,
+  email: site.email,
+  sameAs: [site.telegram],
+  department: yards.map((y) => ({
+    '@type': 'LocalBusiness',
+    name: `${site.name} — ${y.name}`,
+    url: `${site.url}/punkty-priema/${y.slug}`,
+    telephone: y.phones[0],
+    address: { '@type': 'PostalAddress', streetAddress: y.address, addressRegion: 'Московская область', addressCountry: 'RU' },
+    openingHours: 'Mo-Su 00:00-24:00',
+  })),
+};
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {(import.meta.env.SITE_NOINDEX || noindex) && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="theme-color" content="#1C1F22" />
+    <meta name="format-detection" content="telephone=no" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    {extraLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
+    <!-- Яндекс Метрика (счётчик 87324352, с Вебвизором) подключается здесь перед запуском. -->
+  </head>
+  <body data-page={page} data-preview={isPreview ? '' : undefined} data-main={isPreview ? previewMain : undefined} data-istra={isPreview ? previewIstra : undefined}>
+    {isPreview && (
+      <div class="pv" data-pv>
+        <span>{page === 'v2' ? 'Превью · вариант 2 с 3D' : 'Превью'}</span>
+        <a href="/" aria-current={page === 'home' ? 'page' : undefined}>{page === 'v2' ? 'Вариант 1' : 'Главная'}</a>
+        <a href="/punkty-priema/istra" aria-current={page === 'yard' ? 'page' : undefined}>Площадка Истра</a>
+        <button type="button" data-phone-view>Показать как на телефоне</button>
+      </div>
+    )}
+    <a class="skip" href="#main">К содержанию</a>
+    <slot />
+    <div class="toast" role="status" aria-live="polite" hidden></div>
+    <script>
+      import '../scripts/site.js';
+    </script>
+  </body>
+</html>

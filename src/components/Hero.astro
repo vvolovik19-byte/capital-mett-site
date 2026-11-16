@@ -1,0 +1,43 @@
+---
+import site from '../data/site.json';
+import PriceBoard from './PriceBoard.astro';
+import Terms from './Terms.astro';
+---
+<section class="hero">
+  <div class="hero__media" aria-hidden="true">
+    {site.heroVideo ? (
+      <video autoplay muted loop playsinline preload="metadata" poster={site.heroVideo.poster}>
+        <source src={site.heroVideo.mobile} type="video/mp4" media="(max-width: 700px)" />
+        <source src={site.heroVideo.src} type="video/mp4" />
+      </video>
+    ) : (
+      <>
+        <svg class="hero__steel" preserveAspectRatio="none">
+          <filter id="steel" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.75" numOctaves="3" seed="11" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.55 0 0 0 -0.12" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#steel)" />
+        </svg>
+        <div class="hero__sheen"></div>
+      </>
+    )}
+  </div>
+  <div class="wrap hero__in">
+    <h1 class="hero__title">
+      <span class="hero__title-main">Приём металлолома,</span>
+      <span class="hero__title-rest">макулатуры и пластика в&nbsp;Москве и&nbsp;Московской области</span>
+    </h1>
+    <p class="hero__lead">Чёрный и цветной лом от 1 кг. 7 площадок в Подмосковье, принимаем круглосуточно. Вывезем с объекта по договорённости.</p>
+    <div class="hero__actions">
+      <a class="btn btn--accent btn--big" href={site.phone.href} data-goal="phone">
+        <span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span>
+      </a>
+      <a class="btn btn--line-light btn--big" href="#ploshchadki">Ближайшая площадка</a>
+    </div>
+    {!site.heroVideo && <p class="hero__note">Фон — заглушка. Здесь будет видео с площадки: кран с магнитом, погрузка.</p>}
+  </div>
+  <PriceBoard />
+</section>
+
+<Terms />

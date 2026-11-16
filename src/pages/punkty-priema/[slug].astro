@@ -1,0 +1,195 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import PriceBoard from '../../components/PriceBoard.astro';
+import Terms from '../../components/Terms.astro';
+import Calculator from '../../components/Calculator.astro';
+import Chat from '../../components/Chat.astro';
+import Footer from '../../components/Footer.astro';
+import site from '../../data/site.json';
+import yards from '../../data/yards.json';
+import { prices, rub, updatedText, updatedISO } from '../../data/prices';
+
+// Страница собирается для каждой площадки, у которой в yards.json заполнен блок "page".
+export function getStaticPaths() {
+  return yards.filter((y) => y.page).map((y) => ({ params: { slug: y.slug }, props: { yard: y } }));
+}
+const { yard } = Astro.props;
+const pg = yard.page!;
+const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
+const phone = { text: yard.phones[0], href: tel(yard.phones[0]) };
+const q = encodeURIComponent('Капитал Метт, ' + yard.address);
+const yandex = `https://yandex.ru/maps/?text=${q}`;
+const google = `https://www.google.com/maps/search/?api=1&query=${q}`;
+const near = pg.near.map((s) => yards.find((y) => y.slug === s)!);
+const groups = [...new Set(prices.map((p) => p.category))].map((c) => ({ name: c, rows: prices.filter((p) => p.category === c) }));
+const path = `/punkty-priema/${yard.slug}`;
+
+const faq = [
+  ['Когда работает площадка?', `Круглосуточно, без выходных. Перед поездкой ночью можно позвонить: ${phone.text}.`],
+  ['Нужен ли паспорт?', 'Да. Без паспорта принять лом не сможем.'],
+  ['Как вы платите?', 'Только безналичным расчётом: переводом на карту частного лица или на счёт организации.'],
+  ['Есть ли минимальный вес?', 'Принимаем от 1 кг.'],
+  ['Почему итоговая сумма может отличаться от прайса?', 'В партии бывает засор: земля, ржавчина, краска, неметаллические части. Его процент определяют при приёмке и обсуждают с вами на площадке.'],
+  ['Можно ли вывезти лом с моего объекта?', `Да, вывозим ${pg.pickup}. Условия обсуждаем по телефону.`],
+];
+const ld = [
+  {
+    '@context': 'https://schema.org', '@type': 'LocalBusiness',
+    name: `${site.name} — приём металлолома ${pg.inCity}`,
+    url: site.url + path, telephone: yard.phones[0],
+    address: { '@type': 'PostalAddress', streetAddress: yard.address, addressRegion: 'Московская область', addressCountry: 'RU' },
+    openingHoursSpecification: { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '00:00', closes: '23:59' },
+    // geo: добавить точные координаты из карточки Яндекс Бизнеса
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [['Главная', '/'], ['Пункты приёма', '/punkty-priema'], [yard.name, path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: faq.map(([qn, a]) => ({ '@type': 'Question', name: qn, acceptedAnswer: { '@type': 'Answer', text: a } })),
+  },
+];
+---
+<Base
+  page="yard"
+  path={path}
+  title={`Приём металлолома ${pg.inCity} — круглосуточно, ${pg.street} | Капитал Метт`}
+  description={`Пункт приёма металлолома ${pg.inCity}: медь, латунь, алюминий, чёрный лом. От 1 кг, безналичный расчёт. Адрес, телефон, маршрут.`}
+  extraLd={ld}
+>
+  <Header />
+  <main id="main">
+    <section class="hero hero--yard">
+      <div class="hero__media" aria-hidden="true">
+        <svg class="hero__steel" preserveAspectRatio="none">
+          <filter id="steel" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.75" numOctaves="3" seed="11" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.55 0 0 0 -0.12" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#steel)" />
+        </svg>
+      </div>
+      <div class="wrap hero__in">
+        <nav class="crumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a><a href="/punkty-priema">Пункты приёма</a><span aria-current="page">{yard.name}</span>
+        </nav>
+        <h1 class="hero__title"><span class="hero__title-main">Приём металлолома {pg.inCity}</span></h1>
+        <p class="yardhead__addr">{yard.address}</p>
+        <p class="yardhead__open"><i class="dot" aria-hidden="true"></i>Круглосуточно, без выходных</p>
+        <div class="hero__actions">
+          <a class="btn btn--accent btn--big" href={phone.href} data-goal="phone">
+            <span class="btn__label">Позвонить</span><span class="btn__num">{phone.text}</span>
+          </a>
+          <a class="btn btn--line-light btn--big" href={yandex} target="_blank" rel="noopener" data-goal="route">Маршрут</a>
+          <Chat variant="dark" />
+        </div>
+      </div>
+      <PriceBoard allHref="#ceny" />
+    </section>
+    <Terms />
+
+    <section class="section" id="kak-nayti">
+      <div class="wrap find">
+        <div class="find__map">
+          <div class="mapbox">
+            <span class="mapbox__pin" aria-hidden="true"></span>
+            <p><b>{yard.address}</b>Здесь будет Яндекс Карта с точкой площадки. В превью карты не загружаются.</p>
+          </div>
+          <p class="find__links">
+            <a href={yandex} target="_blank" rel="noopener" data-goal="route">Открыть в Яндекс Картах</a>
+            <a href={google} target="_blank" rel="noopener" data-goal="route">Открыть в Google Картах</a>
+          </p>
+        </div>
+        <div class="find__text">
+          <h2>Как нас найти</h2>
+          <dl class="contacts">
+            <div><dt>Адрес</dt><dd>{yard.address}</dd></div>
+            <div><dt>Телефон площадки</dt><dd><a href={phone.href} data-goal="phone">{phone.text}</a></dd></div>
+            <div><dt>Часы работы</dt><dd>Круглосуточно, без выходных</dd></div>
+          </dl>
+          <p class={pg.howToFind ? undefined : 'todo'}>{pg.howToFind ?? 'Здесь будет ваш текст: ориентиры, с какой стороны въезд, как проехать грузовой машине.'}</p>
+        </div>
+        <ul class="find__photos">
+          {pg.photos.map((t) => <li class="ph ph--wide"><span>Фото: {t}</span></li>)}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section section--concrete" id="ceny">
+      <div class="wrap">
+        <header class="section__head">
+          <h2>Цены на площадке {pg.inCity}</h2>
+          <p>Цены на <time datetime={updatedISO}>{updatedText}</time>. Одинаковые на всех площадках. Итог зависит от засора: его оценивают при приёмке.</p>
+        </header>
+        <div class="pricelist">
+          {groups.map((g, i) => (
+            <details open={i < 2}>
+              <summary><span>{g.name}</span><small>{g.rows.length} позиций</small></summary>
+              <table>
+                <tbody>
+                  {g.rows.map((r) => (
+                    <tr class={typeof r.price === 'number' ? undefined : 'is-muted'}>
+                      <th scope="row">{r.name}</th>
+                      <td>{typeof r.price === 'number' ? <><b>{rub(r.price)}</b> {r.unit}</> : r.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <Calculator phone={phone} title="Посчитайте сумму до поездки" />
+
+    <section class="section" id="usloviya">
+      <div class="wrap twocol">
+        <div>
+          <h2>Что взять с собой</h2>
+          <ul class="ticks">
+            <li><b>Паспорт.</b> Без него лом не принимаем.</li>
+            <li><b>Карту или реквизиты.</b> Платим только безналичным расчётом: на карту или на счёт организации.</li>
+            <li><b>Лом от 1 кг.</b> Принимаем у частных лиц и компаний.</li>
+          </ul>
+          <h3 class="twocol__sub">Не хотите везти сами?</h3>
+          <p>Вывозим лом {pg.pickup}. Условия обсуждаем по телефону.</p>
+          <p class="twocol__actions">
+            <button class="btn btn--accent" type="button" data-open="order">Заказать вывоз</button>
+            <Chat variant="button" />
+          </p>
+        </div>
+        <div>
+          <h2>Частые вопросы</h2>
+          <div class="faq">
+            {faq.map(([qn, a]) => <details><summary>{qn}</summary><p>{a}</p></details>)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--concrete section--tight" id="ryadom">
+      <div class="wrap">
+        <header class="section__head"><h2>Другие площадки рядом</h2></header>
+        <ul class="yardlist yardlist--row">
+          {near.map((y) => (
+            <li class="yard">
+              <div class="yard__main">
+                <h3><a href={`/punkty-priema/${y.slug}`}>{y.name}</a></h3>
+                <p class="yard__addr">{y.address}</p>
+                <p class="yard__meta"><span class="open"><i class="dot" aria-hidden="true"></i>Круглосуточно</span></p>
+              </div>
+              <div class="yard__call">
+                <a class="btn btn--accent" href={tel(y.phones[0])} data-goal="phone"><span class="btn__label">Позвонить</span><span class="btn__num">{y.phones[0]}</span></a>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p class="allyards"><a class="textlink" href="/punkty-priema">Все 7 площадок</a></p>
+      </div>
+    </section>
+  </main>
+  <Footer phoneHref={phone.href} />
+</Base>

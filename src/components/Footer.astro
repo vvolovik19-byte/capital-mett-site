@@ -1,0 +1,51 @@
+---
+import site from '../data/site.json';
+import yards from '../data/yards.json';
+import LeadForm from './LeadForm.astro';
+---
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="foot__col">
+      <p class="foot__name">Капитал Метт</p>
+      <p>Приём металлолома, макулатуры и пластика в Москве и Московской области. Круглосуточно.</p>
+      <p class="foot__req">{site.requisites ?? `${site.legalName}. ИНН, ОГРН и юридический адрес добавим перед запуском.`}</p>
+    </div>
+    <div class="foot__col">
+      <h2>Контакты</h2>
+      <a class="foot__phone" href={site.phone.href} data-goal="phone">{site.phone.text}</a>
+      <a href={site.phoneExtra.href} data-goal="phone">{site.phoneExtra.text}</a>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <a href={site.chat.telegram} target="_blank" rel="noopener" data-goal="telegram">Написать в Telegram</a>
+      <a href={site.chat.whatsapp} target="_blank" rel="noopener" data-goal="whatsapp">Написать в WhatsApp</a>
+      <a href={site.telegram} target="_blank" rel="noopener" data-goal="channel">Telegram-канал: t.me/capitalmett</a>
+    </div>
+    <div class="foot__col foot__col--wide">
+      <h2>Площадки</h2>
+      <ul class="foot__yards">
+        {yards.map((y) => <li><a href={`/punkty-priema/${y.slug}`}>{y.name}</a></li>)}
+      </ul>
+    </div>
+    <div class="foot__col">
+      <h2>Сайт</h2>
+      <a href="/tseny">Цены</a>
+      <a href="/kalkulyator">Калькулятор</a>
+      <a href="/punkty-priema">Пункты приёма</a>
+      <a href="/about">О компании</a>
+      <a href="/privacy">Политика обработки персональных данных</a>
+    </div>
+  </div>
+</footer>
+
+<nav class="dock" aria-label="Быстрая связь">
+  <a class="dock__call" href={Astro.props.phoneHref ?? site.phone.href} data-goal="phone">Позвонить</a>
+  <a class="dock__chat" href={site.chat.telegram} target="_blank" rel="noopener" data-goal="telegram">Telegram</a>
+  <a class="dock__chat" href={site.chat.whatsapp} target="_blank" rel="noopener" data-goal="whatsapp">WhatsApp</a>
+</nav>
+
+<dialog class="modal" id="order" aria-labelledby="order-title">
+  <button class="modal__close" type="button" data-close aria-label="Закрыть">×</button>
+  <h2 id="order-title">Заказать вывоз</h2>
+  <p>Оставьте телефон и адрес. Перезвоним, уточним объём и договоримся о времени.</p>
+  <LeadForm id="order-form" variant="order" submit="Отправить заявку" />
+  <p class="modal__alt">Быстрее по телефону: <a href={site.phone.href} data-goal="phone">{site.phone.text}</a></p>
+</dialog>

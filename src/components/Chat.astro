@@ -1,0 +1,20 @@
+---
+// Кнопки мессенджеров. Официальные значки Telegram и WhatsApp кладём в public/images/
+// (telegram.svg, whatsapp.svg) — тогда они появятся вместо букв.
+import { existsSync } from 'node:fs';
+import site from '../data/site.json';
+interface Props { variant?: 'chip' | 'button' | 'dark'; label?: boolean }
+const { variant = 'chip', label = true } = Astro.props;
+const items = [
+  { key: 'telegram', name: 'Telegram', short: 'TG', href: site.chat.telegram },
+  { key: 'whatsapp', name: 'WhatsApp', short: 'WA', href: site.chat.whatsapp },
+].map((i) => ({ ...i, icon: existsSync(`public/images/${i.key}.svg`) ? `/images/${i.key}.svg` : null }));
+---
+<span class={`chat chat--${variant}`}>
+  {items.map((i) => (
+    <a class={`chat__btn chat__btn--${i.key}`} href={i.href} target="_blank" rel="noopener" data-goal={i.key} aria-label={`Написать в ${i.name}`}>
+      {i.icon ? <img src={i.icon} alt="" width="20" height="20" /> : <span class="chat__mono" aria-hidden="true">{i.short}</span>}
+      {label && <span class="chat__name">{i.name}</span>}
+    </a>
+  ))}
+</span>

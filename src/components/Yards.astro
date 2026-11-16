@@ -1,0 +1,73 @@
+---
+import yards from '../data/yards.json';
+const W = 640, H = 330;
+const box = { lonMin: 36.55, lonMax: 38.95, latMin: 55.48, latMax: 56.08 };
+const px = (lon: number) => +(((lon - box.lonMin) / (box.lonMax - box.lonMin)) * W).toFixed(1);
+const py = (lat: number) => +(((box.latMax - lat) / (box.latMax - box.latMin)) * H).toFixed(1);
+const msk = { x: px(37.62), y: py(55.752) };
+const mkad = { rx: +(0.3 / (box.lonMax - box.lonMin) * W).toFixed(1), ry: +(0.165 / (box.latMax - box.latMin) * H).toFixed(1) };
+// Шоссе: условные лучи от МКАД
+const roads = [
+  { name: 'Новорижское ш.', to: [36.6, 55.93], lx: 36.98, ly: 55.83 },
+  { name: 'Минское ш.', to: [36.6, 55.56], lx: 36.72, ly: 55.555 },
+  { name: 'Щёлковское ш.', to: [38.4, 56.03], lx: 38.2, ly: 56.02 },
+  { name: 'Горьковское ш.', to: [38.93, 55.8], lx: 38.5, ly: 55.84 },
+];
+const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
+const route = (a: string) => 'https://yandex.ru/maps/?text=' + encodeURIComponent('Капитал Метт, ' + a);
+const labelPos = { left: { dx: -12, dy: 4, a: 'end' }, right: { dx: 12, dy: 4, a: 'start' }, top: { dx: 0, dy: -13, a: 'middle' }, bottom: { dx: 0, dy: 22, a: 'middle' }, bl: { dx: 6, dy: 26, a: 'end' }, br: { dx: -6, dy: 26, a: 'start' } } as const;
+---
+<section class="section section--concrete" id="ploshchadki">
+  <div class="wrap">
+    <header class="section__head" data-reveal>
+      <h2>7 площадок в Подмосковье</h2>
+      <p>Цены и правила приёма одинаковые на всех площадках. Выберите ближайшую и позвоните прямо туда.</p>
+    </header>
+    <div class="yards">
+      <figure class="map" data-reveal>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Схема: площадки Капитал Метт вокруг Москвы">
+          <g class="map__roads">
+            {roads.map((r) => <line x1={msk.x} y1={msk.y} x2={px(r.to[0])} y2={py(r.to[1])} />)}
+          </g>
+          <ellipse class="map__mkad" cx={msk.x} cy={msk.y} rx={mkad.rx} ry={mkad.ry} />
+          <text class="map__city" x={msk.x} y={msk.y + 5} text-anchor="middle">Москва</text>
+          {roads.map((r) => <text class="map__road" x={px(r.lx)} y={py(r.ly)} text-anchor="middle">{r.name}</text>)}
+          {yards.map((y) => {
+            const l = labelPos[(y.label || 'top') as keyof typeof labelPos];
+            return (
+              <a class="pin" href={`#yard-${y.slug}`} data-yard={y.slug}>
+                <circle class="pin__halo" cx={px(y.lon)} cy={py(y.lat)} r="13" />
+                <circle class="pin__dot" cx={px(y.lon)} cy={py(y.lat)} r="5.5" />
+                {y.mapLabel && <text x={px(y.lon) + l.dx} y={py(y.lat) + l.dy} text-anchor={l.a}>{y.mapLabel}</text>}
+                <title>{y.name}</title>
+              </a>
+            );
+          })}
+        </svg>
+        <figcaption>Схема расположения. На сайте здесь будет Яндекс Карта с маршрутом.</figcaption>
+      </figure>
+      <ul class="yardlist">
+        {yards.map((y) => (
+          <li class="yard" id={`yard-${y.slug}`} data-yard={y.slug} data-reveal>
+            <div class="yard__main">
+              <h3><a href={`/punkty-priema/${y.slug}`}>{y.name}</a></h3>
+              <p class="yard__addr">{y.address}</p>
+              <p class="yard__meta">
+                <span class="open"><i class="dot" aria-hidden="true"></i>Круглосуточно</span>
+                <a href={route(y.address)} target="_blank" rel="noopener">Маршрут</a>
+                <a href={`/punkty-priema/${y.slug}`}>Страница площадки</a>
+              </p>
+            </div>
+            <div class="yard__call">
+              {y.phones.map((p, i) => (
+                <a class={i === 0 ? 'btn btn--accent' : 'yard__phone2'} href={tel(p)} data-goal="phone">
+                  {i === 0 && <span class="btn__label">Позвонить</span>}<span class="btn__num">{p}</span>
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,15 @@
+---
+interface Props { id: string; variant?: 'call' | 'order'; submit: string }
+const { id, variant = 'call', submit } = Astro.props;
+---
+<form class="form" id={id} action="/api/zayavka.php" method="post" data-form={variant} novalidate>
+  <label class="field"><span>Имя</span><input id={`${id}-name`} name="name" type="text" autocomplete="name" /></label>
+  <label class="field"><span>Телефон</span><input id={`${id}-phone`} name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7" required /></label>
+  {variant === 'order' && (
+    <label class="field"><span>Адрес объекта</span><input id={`${id}-address`} name="address" type="text" autocomplete="street-address" /></label>
+  )}
+  <label class="field"><span>{variant === 'order' ? 'Что и сколько вывозим' : 'Что сдаёте (необязательно)'}</span><input id={`${id}-what`} name="what" type="text" /></label>
+  <label class="check"><input id={`${id}-agree`} name="agree" type="checkbox" required /><span>Согласен на обработку персональных данных по <a href="/privacy">политике</a></span></label>
+  <p class="form__msg" role="alert" hidden></p>
+  <button class="btn btn--accent btn--big" type="submit">{submit}</button>
+</form>
