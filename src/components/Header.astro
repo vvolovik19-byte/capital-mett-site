@@ -1,10 +1,11 @@
 ---
 import { existsSync } from 'node:fs';
 import site from '../data/site.json';
+import services from '../data/services.json';
 import Chat from './Chat.astro';
 const nav = [
   { href: '/tseny', text: 'Цены' },
-  { href: '/#uslugi', text: 'Услуги' },
+  { href: '/#uslugi', text: 'Услуги', sub: services.map((s) => ({ href: `/uslugi/${s.slug}`, text: s.nav })) },
   { href: '/#ploshchadki', text: 'Площадки' },
   { href: '/#kalkulyator', text: 'Калькулятор' },
   { href: '/about', text: 'О компании' },
@@ -28,7 +29,9 @@ const logo = existsSync('public/images/logo3.svg') ? '/images/logo3.svg' : null;
         : <><span class="logo__mark" aria-hidden="true"></span><span class="logo__text">Капитал Метт</span></>}
     </a>
     <nav class="nav" aria-label="Основное меню">
-      {nav.map((n) => <a href={n.href}>{n.text}</a>)}
+      {nav.map((n) => n.sub
+        ? <div class="nav__group"><a class="nav__top" href={n.href}>{n.text}</a><div class="nav__sub">{n.sub.map((c) => <a href={c.href}>{c.text}</a>)}</div></div>
+        : <a href={n.href}>{n.text}</a>)}
     </nav>
     <div class="head__mobile">
       <Chat variant="chip" label={false} />
@@ -39,7 +42,7 @@ const logo = existsSync('public/images/logo3.svg') ? '/images/logo3.svg' : null;
   </div>
   <div class="drawer" id="drawer" hidden>
     <nav class="wrap drawer__in" aria-label="Меню">
-      {nav.map((n) => <a href={n.href}>{n.text}</a>)}
+      {nav.map((n) => <><a href={n.href}>{n.text}</a>{n.sub?.map((c) => <a class="drawer__sub" href={c.href}>{c.text}</a>)}</>)}
       <button class="btn btn--accent btn--big" type="button" data-open="order">Заказать вывоз</button>
       <a class="drawer__phone" href={site.phone.href} data-goal="phone">{site.phone.text}</a>
       <Chat variant="button" />

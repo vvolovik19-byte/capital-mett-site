@@ -1,0 +1,286 @@
+---
+// Одна страница на все услуги. Тексты и порядок блоков — в src/data/services.json, техника — в fleet.json.
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import PriceBoard from '../../components/PriceBoard.astro';
+import Steps from '../../components/Steps.astro';
+import LeadForm from '../../components/LeadForm.astro';
+import Chat from '../../components/Chat.astro';
+import Footer from '../../components/Footer.astro';
+import site from '../../data/site.json';
+import yards from '../../data/yards.json';
+import services from '../../data/services.json';
+import fleet from '../../data/fleet.json';
+
+export function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
+}
+const { svc } = Astro.props as { svc: any };
+const path = `/uslugi/${svc.slug}`;
+const isPreview = Boolean(import.meta.env.PUBLIC_PREVIEW);
+const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
+const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(n);
+
+// В текстах можно писать {phone} и ссылки вида [текст](/адрес)
+const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+const rich = (s: string) => esc(s)
+  .replaceAll('{phone}', `<a class="nowrap" href="${site.phone.href}" data-goal="phone">${site.phone.text}</a>`)
+  .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+const plain = (s: string) => s.replaceAll('{phone}', site.phone.text).replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+const machine = (item: any) => ({ ...fleet.machines.find((m) => m.id === item.id)!, ...item });
+const others = services.filter((s) => s.slug !== svc.slug);
+const faq: string[][] = svc.blocks.filter((b: any) => b.type === 'faq').flatMap((b: any) => b.items);
+
+// Светлые блоки чередуют белый и бетонный фон
+let light = 0;
+const blocks = svc.blocks.map((b: any) => {
+  const dark = b.type === 'prices' || b.type === 'form' || (b.type === 'fleet' && b.mode === 'rent');
+  return { ...b, tone: dark ? 'section--dark' : light++ % 2 ? 'section--concrete' : '' };
+});
+const lastTone = [...blocks].reverse().find((b) => b.tone !== 'section--dark')?.tone;
+
+const ld = [
+  {
+    '@context': 'https://schema.org', '@type': 'Service',
+    name: svc.h1, serviceType: svc.serviceType, description: svc.description, url: site.url + path,
+    provider: { '@type': 'Organization', name: site.legalName, url: site.url, telephone: site.phone.text },
+    areaServed: [{ '@type': 'City', name: 'Москва' }, { '@type': 'AdministrativeArea', name: 'Московская область' }],
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [['Главная', '/'], ['Услуги', '/#uslugi'], [svc.nav, path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: plain(a) } })),
+  },
+];
+---
+<Base page="service" path={path} title={svc.title} description={svc.description} extraLd={ld}>
+  <Header />
+  <main id="main">
+    <section class="hero hero--yard hero--service">
+      <div class="hero__media" aria-hidden="true">
+        <svg class="hero__steel" preserveAspectRatio="none">
+          <filter id="steel" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.75" numOctaves="3" seed="11" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.55 0 0 0 -0.12" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#steel)" />
+        </svg>
+      </div>
+      <div class="wrap hero__in">
+        <nav class="crumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a><a href="/#uslugi">Услуги</a><span aria-current="page">{svc.nav}</span>
+        </nav>
+        <h1 class="hero__title"><span class="hero__title-main">{svc.h1}</span></h1>
+        <p class="hero__lead">{svc.lead}</p>
+        <div class="hero__actions">
+          <button class="btn btn--accent btn--big" type="button" data-open="service-order">{svc.action}</button>
+          <a class="btn btn--line-light btn--big hero__call" href={site.phone.href} data-goal="phone">
+            <span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span>
+          </a>
+          <Chat variant="dark" />
+        </div>
+      </div>
+    </section>
+
+    {svc.facts && (
+      <section class="terms" aria-label="Коротко об услуге">
+        <ul class="wrap terms__list">
+          {svc.facts.map(([b, t]: string[]) => <li><b>{b}</b><span>{t}</span></li>)}
+        </ul>
+      </section>
+    )}
+
+    {blocks.map((b: any) => (
+      <>
+        {b.type === 'cards' && (
+          <section class:list={['section', b.tone]}>
+            <div class="wrap">
+              <header class="section__head"><h2>{b.title}</h2>{b.text && <p>{b.text}</p>}</header>
+              <ol class="conds">
+                {b.items.map((c: any, i: number) => (
+                  <li class="cond" data-reveal><span class="cond__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><h3>{c.title}</h3><p>{c.text}</p></li>
+                ))}
+              </ol>
+              {isPreview && b.todo && <p class="todo todo--below">{b.todo}</p>}
+            </div>
+          </section>
+        )}
+
+        {b.type === 'tiles' && (
+          <section class:list={['section', b.tone]}>
+            <div class="wrap">
+              <header class="section__head"><h2>{b.title}</h2>{b.text && <p>{b.text}</p>}</header>
+              <ul class="tiles">
+                {b.items.map((t: string, i: number) => (
+                  <li data-reveal><span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><h3>{t}</h3></li>
+                ))}
+              </ul>
+              {isPreview && b.todo && <p class="todo todo--below">{b.todo}</p>}
+            </div>
+          </section>
+        )}
+
+        {b.type === 'fleet' && (
+          <section class:list={['section', b.tone, b.mode === 'rent' && 'section--line']} id="tekhnika">
+            <div class="wrap">
+              <header class="section__head"><h2>{b.title}</h2>{b.text && <p>{b.text}</p>}</header>
+              <ul class:list={['fleet', b.items.length === 2 && 'fleet--2']}>
+                {b.items.map(machine).map((m: any) => (
+                  <li class="car" data-reveal>
+                    {m.photo
+                      ? <img class="car__photo" src={m.photo} alt={m.name} loading="lazy" />
+                      : <div class="ph car__photo"><span>Фото: {m.name}</span></div>}
+                    <div class="car__body">
+                      <h3>{m.name}</h3>
+                      {m.text && <p class="car__use">{m.text}</p>}
+                      <dl class="car__specs">
+                        {m.specs.map((s: any) => (
+                          <div>
+                            <dt>{s.label}</dt>
+                            {s.value
+                              ? <dd>{s.value}{isPreview && s.check && <span class="mark" title="Уточнить у владельца">{s.check}</span>}</dd>
+                              : <dd class="is-todo">уточняется</dd>}
+                          </div>
+                        ))}
+                      </dl>
+                      {b.mode === 'rent' && (
+                        <div class="car__buy">
+                          <p class="car__price"><b>{rub(m.pricePerShift)}</b> ₽ за смену</p>
+                          <button class="btn btn--accent" type="button" data-open="service-order" data-machine={m.id}>Заказать</button>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {b.mode === 'rent' && <p class="fleet__note">{fleet.shift}</p>}
+              {isPreview && b.mode === 'rent' && !fleet.pricesConfirmed && <p class="todo todo--below">Цены аренды взяты со старого сайта. Подтвердите их в fleet.json перед запуском.</p>}
+            </div>
+          </section>
+        )}
+
+        {b.type === 'prices' && (
+          <section class="section--dark band" id="ceny">
+            <div class="wrap band__head">
+              <h2>{b.title}</h2>
+              <p>{b.text}</p>
+            </div>
+            <PriceBoard />
+          </section>
+        )}
+
+        {b.type === 'steps' && <Steps title={b.title} id="etapy" tone={b.tone} items={b.items} replace={b.replace} photoAsk={b.photoAsk} />}
+
+        {b.type === 'text' && (
+          <section class:list={['section', b.tone]}>
+            <div class:list={['wrap', b.aside ? 'twocol' : 'textblock']}>
+              {!b.aside && <h2>{b.title}</h2>}
+              <div class="prose">
+                {b.aside && <h2>{b.title}</h2>}
+                {b.paragraphs?.map((p: string) => <p set:html={rich(p)} />)}
+                {b.ticks && (
+                  <ul class="ticks">
+                    {b.ticks.map(([h, t]: string[]) => <li><b>{h}</b> {t}</li>)}
+                  </ul>
+                )}
+              </div>
+              {b.aside?.type === 'photos' && (
+                <ul class="sidephotos">
+                  {b.aside.items.map((t: string) => <li class="ph ph--wide"><span>Фото: {t}</span></li>)}
+                </ul>
+              )}
+              {b.aside?.type === 'license' && (
+                <div class="license">
+                  <h3>{b.aside.title}</h3>
+                  <ul class="license__scans">
+                    {b.aside.scans.map((t: string) => <li class="ph ph--doc"><span>{t}</span></li>)}
+                  </ul>
+                  <a class="textlink" href={b.aside.link.href}>{b.aside.link.text}</a>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {b.type === 'faq' && (
+          <section class:list={['section', b.tone]} id="voprosy">
+            <div class="wrap twocol">
+              <div class="askbox">
+                <h2>Частые вопросы</h2>
+                <p>Не нашли ответ? Позвоните или напишите — ответим сразу.</p>
+                <p class="twocol__actions">
+                  <a class="btn btn--accent" href={site.phone.href} data-goal="phone"><span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span></a>
+                  <Chat variant="button" />
+                </p>
+              </div>
+              <div>
+                <div class="faq">
+                  {b.items.map(([q, a]: string[]) => <details><summary>{q}</summary><p set:html={rich(a)} /></details>)}
+                </div>
+                {isPreview && b.todo && <p class="todo todo--below">{b.todo}</p>}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {b.type === 'form' && (
+          <section class="cta" id="zayavka">
+            <div class="cta__media" aria-hidden="true"><div class="hero__sheen"></div></div>
+            <div class="wrap cta__in">
+              <div class="cta__text" data-reveal>
+                <h2>{svc.form.title}</h2>
+                <p>{svc.form.text}</p>
+                <a class="cta__phone" href={site.phone.href} data-goal="phone">{site.phone.text}</a>
+                <p class="cta__sub">Круглосуточно. По телефону быстрее.</p>
+              </div>
+              <div class="cta__form" data-reveal>
+                <LeadForm id="service-form" variant={svc.form.variant} submit={svc.form.submit} goal={svc.formGoal} service={svc.nav} />
+              </div>
+            </div>
+          </section>
+        )}
+      </>
+    ))}
+
+    <section class:list={['section', 'section--tight', lastTone === 'section--concrete' ? '' : 'section--concrete']} id="drugoe">
+      <div class="wrap">
+        <header class="section__head"><h2>Другие услуги</h2></header>
+        <ul class="others">
+          {others.map((s) => (
+            <li class="other">
+              <h3>{s.card.title}</h3>
+              <p>{s.card.text}</p>
+              <a href={`/uslugi/${s.slug}`}>{s.card.more}</a>
+            </li>
+          ))}
+        </ul>
+        <header class="subhead">
+          <h2>Или привезите лом сами</h2>
+          <p>{yards.length} площадок в Подмосковье, принимаем круглосуточно.</p>
+        </header>
+        <ul class="yardmini">
+          {yards.map((y) => (
+            <li>
+              <a class="yardmini__name" href={`/punkty-priema/${y.slug}`}>{y.name}</a>
+              <span>{y.address}</span>
+              <a class="yardmini__tel" href={tel(y.phones[0])} data-goal="phone">{y.phones[0]}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <dialog class="modal" id="service-order" aria-labelledby="service-order-title">
+    <button class="modal__close" type="button" data-close aria-label="Закрыть">×</button>
+    <h2 id="service-order-title">{svc.form.title}</h2>
+    <p>{svc.form.text}</p>
+    <LeadForm id="service-modal-form" variant={svc.form.variant} submit={svc.form.submit} goal={svc.formGoal} service={svc.nav} />
+    <p class="modal__alt">Быстрее по телефону: <a href={site.phone.href} data-goal="phone">{site.phone.text}</a></p>
+  </dialog>
+</Base>

@@ -1,15 +1,34 @@
 ---
-interface Props { id: string; variant?: 'call' | 'order'; submit: string }
-const { id, variant = 'call', submit } = Astro.props;
+// Форма заявки. Варианты: call — обратный звонок, order — вывоз, estimate — выезд оценщика (демонтаж),
+// rent — аренда техники (машина из fleet.json и дата). goal — доп. цель Метрики, например form-samovyvoz.
+import fleet from '../data/fleet.json';
+type Variant = 'call' | 'order' | 'estimate' | 'rent';
+interface Props { id: string; variant?: Variant; submit: string; goal?: string; service?: string }
+const { id, variant = 'call', submit, goal, service } = Astro.props;
+const address = { order: 'Адрес объекта', estimate: 'Адрес объекта', rent: 'Адрес подачи' }[variant as string];
+const what = { call: 'Что сдаёте (необязательно)', order: 'Что и сколько вывозим', estimate: 'Что нужно демонтировать' }[variant as string];
 ---
-<form class="form" id={id} action="/api/zayavka.php" method="post" data-form={variant} novalidate>
+<form class="form" id={id} action="/api/zayavka.php" method="post" data-form={variant} data-form-goal={goal} novalidate>
+  {service && <input type="hidden" name="service" value={service} />}
   <label class="field"><span>Имя</span><input id={`${id}-name`} name="name" type="text" autocomplete="name" /></label>
   <label class="field"><span>Телефон</span><input id={`${id}-phone`} name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7" required /></label>
-  {variant === 'order' && (
-    <label class="field"><span>Адрес объекта</span><input id={`${id}-address`} name="address" type="text" autocomplete="street-address" /></label>
+  {variant === 'rent' && (
+    <div class="form__row">
+      <label class="field"><span>Машина</span>
+        <select id={`${id}-machine`} name="machine">
+          {fleet.machines.map((m) => <option value={m.name} data-id={m.id}>{m.name}</option>)}
+        </select>
+      </label>
+      <label class="field"><span>Дата</span><input id={`${id}-date`} name="date" type="date" /></label>
+    </div>
   )}
-  <label class="field"><span>{variant === 'order' ? 'Что и сколько вывозим' : 'Что сдаёте (необязательно)'}</span><input id={`${id}-what`} name="what" type="text" /></label>
-  <label class="check"><input id={`${id}-agree`} name="agree" type="checkbox" required /><span>Согласен на обработку персональных данных по <a href="/privacy">политике</a></span></label>
+  {address && (
+    <label class="field"><span>{address}</span><input id={`${id}-address`} name="address" type="text" autocomplete="street-address" /></label>
+  )}
+  {what && (
+    <label class="field"><span>{what}</span><input id={`${id}-what`} name="what" type="text" /></label>
+  )}
+  <label class="check"><input id={`${id}-agree`} name="agree" type="checkbox" required /><span>Согласен на <a href="/soglasie">обработку персональных данных</a> по <a href="/politika">политике</a></span></label>
   <p class="form__msg" role="alert" hidden></p>
   <button class="btn btn--accent btn--big" type="submit">{submit}</button>
 </form>

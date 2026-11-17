@@ -1,10 +1,16 @@
 # Адреса без .html: /tseny, /punkty-priema/istra
 Options -MultiViews
 RewriteEngine On
+
+# 301 со старых адресов услуг. Страницы районов вывоза ведут на общую страницу самовывоза;
+# остальные старые адреса районов добавлять сюда же, по строке на адрес.
+RewriteRule ^uslugi/samovyvoz-orig(\.html)?/?$ /uslugi/samovyvoz [R=301,L]
+RewriteRule ^vyvoz-metalloloma-szao-sao(\.html)?/?$ /uslugi/samovyvoz [R=301,L]
+
 RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
 RewriteRule ^ /%1 [R=301,L]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.+?)/?$ $1.html [L]
 
-# 301-редиректы со старых адресов добавим сюда перед переключением домена
+# Остальные 301-редиректы со старых адресов добавим перед переключением домена

@@ -1,0 +1,67 @@
+# Превью сайта на GitHub Pages: https://<логин>.github.io/<репозиторий>/
+# Собирается при каждой правке в main и вручную кнопкой Run workflow.
+# Пока GitHub Pages не включены в настройках репозитория, запуск ничего не делает.
+# Превью закрыто от поисковиков (noindex и robots.txt). На хостинг ничего не выкладывает.
+name: Превью на GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      on: ${{ steps.check.outputs.on }}
+    steps:
+      - name: Проверить, включены ли GitHub Pages
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "GitHub Pages не включены (Settings → Pages → Source: GitHub Actions) — превью пропускаю."
+            echo "on=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.on == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.on == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - name: Собрать превью
+        if: steps.check.outputs.on == 'true'
+        env:
+          SITE_NOINDEX: '1'
+        run: |
+          npm ci
+          npm run build
+          node scripts/pages-base.mjs "/${{ github.event.repository.name }}"
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.check.outputs.on == 'true'
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.on == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

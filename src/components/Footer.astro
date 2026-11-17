@@ -1,6 +1,7 @@
 ---
 import site from '../data/site.json';
 import yards from '../data/yards.json';
+import services from '../data/services.json';
 import LeadForm from './LeadForm.astro';
 ---
 <footer class="foot">
@@ -26,12 +27,15 @@ import LeadForm from './LeadForm.astro';
       </ul>
     </div>
     <div class="foot__col">
-      <h2>Сайт</h2>
+      <h2>Услуги</h2>
+      {services.map((s) => <a href={`/uslugi/${s.slug}`}>{s.nav}</a>)}
+      <h2 class="foot__next">Сайт</h2>
       <a href="/tseny">Цены</a>
       <a href="/kalkulyator">Калькулятор</a>
       <a href="/punkty-priema">Пункты приёма</a>
       <a href="/about">О компании</a>
-      <a href="/privacy">Политика обработки персональных данных</a>
+      <a href="/politika">Политика обработки персональных данных</a>
+      <a href="/soglasie">Согласие на обработку персональных данных</a>
     </div>
   </div>
 </footer>

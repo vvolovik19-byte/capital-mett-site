@@ -4,11 +4,19 @@ import '@fontsource-variable/unbounded/wght.css';
 import '../styles/global.css';
 import site from '../data/site.json';
 import yards from '../data/yards.json';
+import services from '../data/services.json';
 
 interface Props { title: string; description: string; path?: string; page?: string; extraLd?: object[]; noindex?: boolean }
 const { title, description, path = '/', page = 'home', extraLd = [], noindex = false } = Astro.props;
-const previewMain = import.meta.env.PUBLIC_MAIN_URL ?? '';
-const previewIstra = import.meta.env.PUBLIC_ISTRA_URL ?? '';
+// Превью: каждая страница лежит отдельной ссылкой, адреса передаются переменными при сборке
+const pvPages = [
+  { href: '/', text: page === 'v2' ? 'Вариант 1' : 'Главная', url: import.meta.env.PUBLIC_MAIN_URL },
+  { href: '/punkty-priema/istra', text: 'Площадка Истра', url: import.meta.env.PUBLIC_ISTRA_URL },
+  { href: `/uslugi/${services[0].slug}`, text: services[0].short, url: import.meta.env.PUBLIC_SAMOVYVOZ_URL },
+  { href: `/uslugi/${services[1].slug}`, text: services[1].short, url: import.meta.env.PUBLIC_DEMONTAZH_URL },
+  { href: `/uslugi/${services[2].slug}`, text: services[2].short, url: import.meta.env.PUBLIC_ARENDA_URL },
+];
+const pvRoutes = JSON.stringify(Object.fromEntries(pvPages.filter((p) => p.url).map((p) => [p.href, p.url])));
 const canonical = new URL(path, site.url).href;
 const isPreview = Boolean(import.meta.env.PUBLIC_PREVIEW);
 
@@ -40,6 +48,7 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     {(import.meta.env.SITE_NOINDEX || noindex) && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
@@ -51,12 +60,11 @@ const jsonLd = {
     {extraLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
     <!-- Яндекс Метрика (счётчик 87324352, с Вебвизором) подключается здесь перед запуском. -->
   </head>
-  <body data-page={page} data-preview={isPreview ? '' : undefined} data-main={isPreview ? previewMain : undefined} data-istra={isPreview ? previewIstra : undefined}>
+  <body data-page={page} data-preview={isPreview ? '' : undefined} data-path={isPreview ? path : undefined} data-routes={isPreview ? pvRoutes : undefined}>
     {isPreview && (
       <div class="pv" data-pv>
         <span>{page === 'v2' ? 'Превью · вариант 2 с 3D' : 'Превью'}</span>
-        <a href="/" aria-current={page === 'home' ? 'page' : undefined}>{page === 'v2' ? 'Вариант 1' : 'Главная'}</a>
-        <a href="/punkty-priema/istra" aria-current={page === 'yard' ? 'page' : undefined}>Площадка Истра</a>
+        {pvPages.map((p) => <a href={p.href} aria-current={p.href === path && page !== 'v2' ? 'page' : undefined}>{p.text}</a>)}
         <button type="button" data-phone-view>Показать как на телефоне</button>
       </div>
     )}

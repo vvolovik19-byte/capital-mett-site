@@ -1,5 +1,6 @@
 ---
 import yards from '../data/yards.json';
+import site from '../data/site.json';
 const W = 640, H = 330;
 const box = { lonMin: 36.55, lonMax: 38.95, latMin: 55.48, latMax: 56.08 };
 const px = (lon: number) => +(((lon - box.lonMin) / (box.lonMax - box.lonMin)) * W).toFixed(1);
@@ -14,7 +15,15 @@ const roads = [
   { name: 'Горьковское ш.', to: [38.93, 55.8], lx: 38.5, ly: 55.84 },
 ];
 const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
-const route = (a: string) => 'https://yandex.ru/maps/?text=' + encodeURIComponent('Капитал Метт, ' + a);
+// «Маршрут» строит путь в Яндекс Картах от места, где сейчас человек, до площадки
+const route = (y: { lat: number; lon: number }) => `https://yandex.ru/maps/?rtext=~${y.lat},${y.lon}&rtt=auto`;
+// Настоящая Яндекс Карта: ключ в site.json (ymapsKey). В превью Claude внешние скрипты не грузятся — там остаётся схема.
+const isPreview = Boolean(import.meta.env.PUBLIC_PREVIEW);
+const liveMap = !isPreview && site.ymapsKey;
+const mapData = JSON.stringify(yards.map((y) => ({
+  name: y.name, address: y.address, lat: y.lat, lon: y.lon, phone: y.phones[0], tel: tel(y.phones[0]),
+  page: `/punkty-priema/${y.slug}`, route: route(y), card: y.yandex, slug: y.slug,
+})));
 const labelPos = { left: { dx: -12, dy: 4, a: 'end' }, right: { dx: 12, dy: 4, a: 'start' }, top: { dx: 0, dy: -13, a: 'middle' }, bottom: { dx: 0, dy: 22, a: 'middle' }, bl: { dx: 6, dy: 26, a: 'end' }, br: { dx: -6, dy: 26, a: 'start' } } as const;
 ---
 <section class="section section--concrete" id="ploshchadki">
@@ -24,7 +33,8 @@ const labelPos = { left: { dx: -12, dy: 4, a: 'end' }, right: { dx: 12, dy: 4, a
       <p>Цены и правила приёма одинаковые на всех площадках. Выберите ближайшую и позвоните прямо туда.</p>
     </header>
     <div class="yards">
-      <figure class="map" data-reveal>
+      <figure class="map" data-reveal data-ymap={liveMap ? site.ymapsKey : undefined} data-ymap-points={liveMap ? mapData : undefined}>
+        {liveMap && <div class="map__live" aria-label="Яндекс Карта с площадками Капитал Метт"></div>}
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Схема: площадки Капитал Метт вокруг Москвы">
           <g class="map__roads">
             {roads.map((r) => <line x1={msk.x} y1={msk.y} x2={px(r.to[0])} y2={py(r.to[1])} />)}
@@ -44,7 +54,9 @@ const labelPos = { left: { dx: -12, dy: 4, a: 'end' }, right: { dx: 12, dy: 4, a
             );
           })}
         </svg>
-        <figcaption>Схема расположения. На сайте здесь будет Яндекс Карта с маршрутом.</figcaption>
+        <figcaption>{isPreview
+          ? 'Схема расположения. На сайте здесь будет Яндекс Карта: в превью Claude она не загружается.'
+          : 'Схема расположения площадок. Нажмите «Маршрут» у нужной площадки.'}</figcaption>
       </figure>
       <ul class="yardlist">
         {yards.map((y) => (
@@ -54,7 +66,7 @@ const labelPos = { left: { dx: -12, dy: 4, a: 'end' }, right: { dx: 12, dy: 4, a
               <p class="yard__addr">{y.address}</p>
               <p class="yard__meta">
                 <span class="open"><i class="dot" aria-hidden="true"></i>Круглосуточно</span>
-                <a href={route(y.address)} target="_blank" rel="noopener">Маршрут</a>
+                <a href={route(y)} target="_blank" rel="noopener">Маршрут</a>
                 <a href={`/punkty-priema/${y.slug}`}>Страница площадки</a>
               </p>
             </div>

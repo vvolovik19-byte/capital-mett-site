@@ -1,4 +1,4 @@
-// Весь интерактив главной: окно заявки, формы, калькулятор, карта, появление блоков.
+// Весь интерактив сайта: окна заявки, формы, калькулятор, карта, появление блоков.
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const isPreview = document.body.hasAttribute('data-preview');
@@ -21,15 +21,69 @@ document.addEventListener('click', (e) => {
   if (el) goal(el.dataset.goal);
 });
 
-/* Окно «Заказать вывоз» открывается только по нажатию */
-const modal = $('#order');
+/* Окна заявки открываются только по нажатию: data-open="id окна".
+   data-machine на кнопке сразу выбирает машину в форме аренды. */
 document.addEventListener('click', (e) => {
-  if (e.target.closest('[data-open="order"]')) {
+  const opener = e.target.closest('[data-open]');
+  const dlg = opener && document.getElementById(opener.dataset.open);
+  if (dlg) {
     setDrawer(false);
-    modal.showModal();
+    const option = opener.dataset.machine && $(`option[data-id="${opener.dataset.machine}"]`, dlg);
+    if (option) option.selected = true;
+    dlg.showModal();
   }
-  if (e.target.closest('[data-close]') || e.target === modal) modal.close();
+  if (e.target.closest('[data-close]') || e.target.matches('dialog')) e.target.closest('dialog')?.close();
 });
+
+/* Яндекс Карта площадок. Скрипт Яндекса грузится, только когда блок подходит к экрану,
+   чтобы не замедлять первую загрузку. Если карта не загрузилась, остаётся схема. */
+const mapFig = $('[data-ymap]');
+if (mapFig) {
+  const start = () => {
+    const s = document.createElement('script');
+    s.src = `https://api-maps.yandex.ru/2.1/?apikey=${encodeURIComponent(mapFig.dataset.ymap)}&lang=ru_RU`;
+    s.async = true;
+    s.onload = () => window.ymaps.ready(buildMap);
+    document.head.append(s);
+  };
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
+  }, { rootMargin: '400px 0px' });
+  io.observe(mapFig);
+}
+function buildMap() {
+  const ymaps = window.ymaps;
+  const points = JSON.parse(mapFig.dataset.ymapPoints);
+  const box = $('.map__live', mapFig);
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2459b3';
+  const touch = matchMedia('(pointer: coarse)').matches;
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  mapFig.classList.add('is-live');
+  const map = new ymaps.Map(box, { center: [55.76, 37.9], zoom: 8, controls: ['zoomControl'] }, { suppressMapOpenBlock: false });
+  map.behaviors.disable('scrollZoom'); // колесо мыши прокручивает страницу, а не карту
+  if (touch) map.behaviors.disable('drag'); // на телефоне карта двигается двумя пальцами
+  const cluster = new ymaps.Clusterer({ clusterIconColor: accent, groupByCoordinates: false, clusterDisableClickZoom: false });
+  points.forEach((p) => {
+    const links = [
+      `<a href="${esc(p.route)}" target="_blank" rel="noopener">Маршрут</a>`,
+      `<a href="${esc(p.page)}">Страница площадки</a>`,
+      p.card && `<a href="${esc(p.card)}" target="_blank" rel="noopener">Отзывы в Яндекс Картах</a>`,
+    ].filter(Boolean).join(' · ');
+    const mark = new ymaps.Placemark([p.lat, p.lon], {
+      hintContent: `Капитал Метт — ${p.name}`,
+      balloonContentHeader: `Капитал Метт — ${esc(p.name)}`,
+      balloonContentBody: `${esc(p.address)}<br>Круглосуточно<br><a href="${esc(p.tel)}" data-goal="phone"><b>${esc(p.phone)}</b></a>`,
+      balloonContentFooter: links,
+    }, { preset: 'islands#dotIcon', iconColor: accent });
+    mark.events.add('balloonopen', () => {
+      $$('.yard.is-active').forEach((el) => el.classList.remove('is-active'));
+      $(`#yard-${p.slug}`)?.classList.add('is-active');
+    });
+    cluster.add(mark);
+  });
+  map.geoObjects.add(cluster);
+  map.setBounds(cluster.getBounds(), { checkZoomRange: true, zoomMargin: 36 });
+}
 
 /* Бургер-меню */
 const burger = $('.burger'), drawer = $('#drawer');
@@ -52,25 +106,26 @@ document.addEventListener('click', (e) => {
   if (target) { e.preventDefault(); e.stopImmediatePropagation(); target.scrollIntoView({ behavior: 'smooth' }); }
 }, true);
 
-/* Превью: готовы только главная и площадка Истра, они лежат по отдельным ссылкам */
+/* Превью: каждая готовая страница лежит по отдельной ссылке (см. Base.astro) */
 if (isPreview) {
-  const { main, istra, page } = document.body.dataset;
+  const routes = JSON.parse(document.body.dataset.routes || '{}');
+  const herePath = document.body.dataset.path;
   const inPhone = window.name === 'pv-phone';
   if (inPhone) $('[data-pv]')?.remove();
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="/"]');
     if (!a) return;
     const href = a.getAttribute('href');
-    const url = href === '/punkty-priema/istra' ? istra : (href === '/' || href.startsWith('/#')) ? main : '';
-    const here = (href === '/' && page === 'home') || (href === '/punkty-priema/istra' && page === 'yard');
-    if (here) { e.preventDefault(); scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    const clean = href.split('#')[0] || '/';
+    if (clean === herePath) { e.preventDefault(); scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    const url = routes[clean];
     if (url) { // открываем соседнюю страницу превью, потом возвращаем настоящую ссылку
       a.href = url; a.target = '_blank'; a.rel = 'noopener';
       setTimeout(() => { a.setAttribute('href', href); a.removeAttribute('target'); }, 0);
       return;
     }
     e.preventDefault();
-    toast('Эта страница появится после утверждения главной');
+    toast('Этой страницы в превью пока нет');
   });
   $('[data-phone-view]')?.addEventListener('click', () => {
     const box = document.createElement('div');
@@ -103,6 +158,7 @@ $$('form[data-form]').forEach((form) => {
       form.reset();
       say('Заявка отправлена. Перезвоним в ближайшее время.');
       goal('form');
+      if (form.dataset.formGoal) goal(form.dataset.formGoal); // с какой страницы заявка
     } catch {
       say('Заявка не отправилась. Позвоните нам: 8-800-550-45-36', true);
     }

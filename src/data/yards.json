@@ -6,8 +6,9 @@
     "phones": [
       "+7 (925) 600-39-55"
     ],
-    "lat": 55.906,
-    "lon": 36.872,
+    "lat": 55.909824,
+    "lon": 36.829824,
+    "yandex": "https://yandex.ru/maps/org/kapital_mett/187972929832/",
     "label": "top",
     "mapLabel": "Истра",
     "page": {
@@ -35,8 +36,9 @@
       "+7 (925) 705-00-75",
       "+7 (925) 504-86-07"
     ],
-    "lat": 55.682,
-    "lon": 37.3,
+    "lat": 55.65552,
+    "lon": 37.259831,
+    "yandex": "https://yandex.ru/maps/org/kapital_mett/8687848195/",
     "label": "left",
     "mapLabel": "Одинцово"
   },
@@ -47,8 +49,9 @@
     "phones": [
       "+7 (925) 602-05-55"
     ],
-    "lat": 55.655,
-    "lon": 37.245,
+    "lat": 55.66263,
+    "lon": 37.25592,
+    "yandex": "https://yandex.ru/maps/org/kapital_mett/226704747066/",
     "label": "",
     "mapLabel": ""
   },
@@ -59,8 +62,9 @@
     "phones": [
       "+7 (967) 266-00-66"
     ],
-    "lat": 55.777,
-    "lon": 38.612,
+    "lat": 55.781812,
+    "lon": 38.618761,
+    "yandex": "https://yandex.ru/maps/org/kapital_mett/191917095960/",
     "label": "top",
     "mapLabel": "Филимоново"
   },
@@ -71,8 +75,9 @@
     "phones": [
       "+7 (926) 388-86-06"
     ],
-    "lat": 55.712,
-    "lon": 38.205,
+    "lat": 55.732768,
+    "lon": 38.193599,
+    "yandex": null,
     "label": "bl",
     "mapLabel": "Электроугли"
   },
@@ -83,8 +88,9 @@
     "phones": [
       "+7 (926) 534-44-42"
     ],
-    "lat": 55.735,
-    "lon": 38.345,
+    "lat": 55.721722,
+    "lon": 38.340194,
+    "yandex": "https://yandex.ru/maps/org/kapital_mett/158337384212/",
     "label": "br",
     "mapLabel": "Воровского"
   },
@@ -95,8 +101,9 @@
     "phones": [
       "+7 (926) 534-44-41"
     ],
-    "lat": 55.915,
-    "lon": 38.01,
+    "lat": 55.924557,
+    "lon": 37.953452,
+    "yandex": "https://yandex.ru/maps/org/kapital_mett/201877275678/",
     "label": "right",
     "mapLabel": "Щёлково"
   }

@@ -1,0 +1,32 @@
+---
+// «Как мы работаем»: пять шагов из steps.json. Страница услуги может заменить отдельные шаги (replace)
+// или дать свой список (items).
+import defaults from '../data/steps.json';
+import site from '../data/site.json';
+import Chat from './Chat.astro';
+interface Props { title?: string; id?: string; tone?: string; items?: string[][]; replace?: Record<string, string[]>; photoAsk?: boolean }
+const { title = 'Как мы работаем', id = 'kak-rabotaem', tone = '', items, replace = {}, photoAsk = false } = Astro.props;
+const steps = (items ?? defaults.map((s, i) => replace[String(i + 1)] ?? s))
+  .map(([t, d]) => [t, d.replaceAll('{phone}', site.phone.text)]);
+---
+<section class:list={['section', tone]} id={id}>
+  <div class="wrap">
+    <header class="section__head" data-reveal>
+      <h2>{title}</h2>
+    </header>
+    <ol class:list={['steps', steps.length === 4 && 'steps--4']}>
+      {steps.map(([t, d], i) => (
+        <li data-reveal><span class="steps__n" aria-hidden="true">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>
+      ))}
+    </ol>
+    {photoAsk && (
+      <div class="photo-ask" data-reveal>
+        <div>
+          <h3>Пришлите фото лома — оценим заранее</h3>
+          <p>Сфотографируйте металл и отправьте нам в Telegram или WhatsApp. Подскажем, что это за лом, и назовём примерную цену до приезда.</p>
+        </div>
+        <Chat variant="button" />
+      </div>
+    )}
+  </div>
+</section>

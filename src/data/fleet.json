@@ -1,0 +1,40 @@
+{
+  "_comment": "Техника для страниц услуг. Правится в одном месте. value: null — данных нет, на странице видна заглушка. check — что нужно уточнить (видно только в превью). photo — путь к фото в public/images/, пока null — подписанная рамка.",
+  "shift": "Смена — 7 часов работы плюс 1 час на подачу. Все машины с водителем.",
+  "pricesConfirmed": false,
+  "machines": [
+    {
+      "id": "gazel",
+      "name": "Газель",
+      "photo": null,
+      "count": null,
+      "pricePerShift": 6000,
+      "specs": [
+        { "label": "Кузов", "value": null, "check": null },
+        { "label": "Грузоподъёмность", "value": null, "check": null }
+      ]
+    },
+    {
+      "id": "multilift",
+      "name": "МАЗ мультилифт",
+      "photo": null,
+      "count": null,
+      "pricePerShift": 12000,
+      "specs": [
+        { "label": "Контейнер", "value": "33 м³", "check": null },
+        { "label": "Грузоподъёмность", "value": "20 т", "check": null }
+      ]
+    },
+    {
+      "id": "manipulyator",
+      "name": "МАЗ манипулятор",
+      "photo": null,
+      "count": null,
+      "pricePerShift": 12000,
+      "specs": [
+        { "label": "Кузов", "value": "28 м³", "check": null },
+        { "label": "Грузоподъёмность", "value": "10 т", "check": "10 или 15 т?" }
+      ]
+    }
+  ]
+}

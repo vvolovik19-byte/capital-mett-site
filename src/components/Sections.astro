@@ -2,34 +2,9 @@
 import site from '../data/site.json';
 import yards from '../data/yards.json';
 import LeadForm from './LeadForm.astro';
-import Chat from './Chat.astro';
-const steps = [
-  ['Вы звоните или оставляете заявку', 'Рассказываете, что и сколько сдаёте.'],
-  ['Выезжаем на объект', 'Если партия крупная или нужен демонтаж.'],
-  ['Оцениваем лом и называем цену', 'Если нужно, заключаем договор.'],
-  ['Вывозим или демонтируем', 'Грузим своей техникой и взвешиваем.'],
-  ['Платим полную стоимость', 'Переводом на карту или на счёт организации.'],
-];
+import Steps from './Steps.astro';
 ---
-<section class="section" id="kak-rabotaem">
-  <div class="wrap">
-    <header class="section__head" data-reveal>
-      <h2>Как мы работаем</h2>
-    </header>
-    <ol class="steps">
-      {steps.map(([t, d], i) => (
-        <li data-reveal><span class="steps__n" aria-hidden="true">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>
-      ))}
-    </ol>
-    <div class="photo-ask" data-reveal>
-      <div>
-        <h3>Пришлите фото лома — оценим заранее</h3>
-        <p>Сфотографируйте металл и отправьте нам в Telegram или WhatsApp. Подскажем, что это за лом, и назовём примерную цену до приезда.</p>
-      </div>
-      <Chat variant="button" />
-    </div>
-  </div>
-</section>
+<Steps photoAsk />
 
 <section class="section section--concrete" id="o-kompanii">
   <div class="wrap about">
