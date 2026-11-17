@@ -35,7 +35,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('[data-close]') || e.target.matches('dialog')) e.target.closest('dialog')?.close();
 });
 
-/* Яндекс Карта площадок. Скрипт Яндекса грузится, только когда блок подходит к экрану,
+/* Яндекс Карта: на главной — все площадки, на странице площадки — одна точка. Скрипт Яндекса грузится, только когда блок подходит к экрану,
    чтобы не замедлять первую загрузку. Если карта не загрузилась, остаётся схема. */
 const mapFig = $('[data-ymap]');
 if (mapFig) {
@@ -59,14 +59,16 @@ function buildMap() {
   const touch = matchMedia('(pointer: coarse)').matches;
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   mapFig.classList.add('is-live');
-  const map = new ymaps.Map(box, { center: [55.76, 37.9], zoom: 8, controls: ['zoomControl'] }, { suppressMapOpenBlock: false });
+  const single = points.length === 1;
+  const zoom = Number(mapFig.dataset.ymapZoom) || 15;
+  const map = new ymaps.Map(box, { center: single ? [points[0].lat, points[0].lon] : [55.76, 37.9], zoom: single ? zoom : 8, controls: ['zoomControl'] }, { suppressMapOpenBlock: false });
   map.behaviors.disable('scrollZoom'); // колесо мыши прокручивает страницу, а не карту
   if (touch) map.behaviors.disable('drag'); // на телефоне карта двигается двумя пальцами
   const cluster = new ymaps.Clusterer({ clusterIconColor: accent, groupByCoordinates: false, clusterDisableClickZoom: false });
   points.forEach((p) => {
     const links = [
       `<a href="${esc(p.route)}" target="_blank" rel="noopener">Маршрут</a>`,
-      `<a href="${esc(p.page)}">Страница площадки</a>`,
+      p.page && `<a href="${esc(p.page)}">Страница площадки</a>`,
       p.card && `<a href="${esc(p.card)}" target="_blank" rel="noopener">Отзывы в Яндекс Картах</a>`,
     ].filter(Boolean).join(' · ');
     const mark = new ymaps.Placemark([p.lat, p.lon], {
@@ -79,10 +81,12 @@ function buildMap() {
       $$('.yard.is-active').forEach((el) => el.classList.remove('is-active'));
       $(`#yard-${p.slug}`)?.classList.add('is-active');
     });
-    cluster.add(mark);
+    if (single) map.geoObjects.add(mark); else cluster.add(mark);
   });
-  map.geoObjects.add(cluster);
-  map.setBounds(cluster.getBounds(), { checkZoomRange: true, zoomMargin: 36 });
+  if (!single) {
+    map.geoObjects.add(cluster);
+    map.setBounds(cluster.getBounds(), { checkZoomRange: true, zoomMargin: 36 });
+  }
 }
 
 /* Бургер-меню */

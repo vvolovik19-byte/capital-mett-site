@@ -9,6 +9,7 @@ import Footer from '../../components/Footer.astro';
 import site from '../../data/site.json';
 import yards from '../../data/yards.json';
 import { prices, rub, updatedText, updatedISO } from '../../data/prices';
+import { route, liveMapKey, mapPoints } from '../../data/map';
 
 // Страница собирается для каждой площадки, у которой в yards.json заполнен блок "page".
 export function getStaticPaths() {
@@ -19,7 +20,9 @@ const pg = yard.page!;
 const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
 const phone = { text: yard.phones[0], href: tel(yard.phones[0]) };
 const q = encodeURIComponent('Капитал Метт, ' + yard.address);
-const yandex = `https://yandex.ru/maps/?text=${q}`;
+// Карточка площадки в Яндекс Картах (отзывы, фото), если она есть; иначе поиск по адресу
+const yandex = yard.yandex ?? `https://yandex.ru/maps/?text=${q}`;
+const routeUrl = route(yard);
 const google = `https://www.google.com/maps/search/?api=1&query=${q}`;
 const near = pg.near.map((s) => yards.find((y) => y.slug === s)!);
 const groups = [...new Set(prices.map((p) => p.category))].map((c) => ({ name: c, rows: prices.filter((p) => p.category === c) }));
@@ -82,7 +85,7 @@ const ld = [
           <a class="btn btn--accent btn--big" href={phone.href} data-goal="phone">
             <span class="btn__label">Позвонить</span><span class="btn__num">{phone.text}</span>
           </a>
-          <a class="btn btn--line-light btn--big" href={yandex} target="_blank" rel="noopener" data-goal="route">Маршрут</a>
+          <a class="btn btn--line-light btn--big" href={routeUrl} target="_blank" rel="noopener" data-goal="route">Маршрут</a>
           <Chat variant="dark" />
         </div>
       </div>
@@ -92,12 +95,14 @@ const ld = [
 
     <section class="section" id="kak-nayti">
       <div class="wrap find">
-        <div class="find__map">
+        <div class="find__map" data-ymap={liveMapKey} data-ymap-points={liveMapKey ? mapPoints([yard], { withPage: false }) : undefined} data-ymap-zoom="15">
+          {liveMapKey && <div class="map__live" aria-label={`Яндекс Карта: площадка Капитал Метт, ${yard.address}`}></div>}
           <div class="mapbox">
             <span class="mapbox__pin" aria-hidden="true"></span>
-            <p><b>{yard.address}</b>Здесь будет Яндекс Карта с точкой площадки. В превью карты не загружаются.</p>
+            <p><b>{yard.address}</b>{liveMapKey ? 'Карта не загрузилась — откройте адрес в Яндекс Картах по ссылке ниже.' : 'Здесь будет Яндекс Карта с точкой площадки. В превью Claude карты не загружаются.'}</p>
           </div>
           <p class="find__links">
+            <a href={routeUrl} target="_blank" rel="noopener" data-goal="route">Построить маршрут</a>
             <a href={yandex} target="_blank" rel="noopener" data-goal="route">Открыть в Яндекс Картах</a>
             <a href={google} target="_blank" rel="noopener" data-goal="route">Открыть в Google Картах</a>
           </p>

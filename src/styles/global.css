@@ -649,7 +649,9 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
 
 /* Яндекс Карта площадок (на сайте; в превью Claude остаётся схема) */
 .map__live { display: none; width: 100%; height: clamp(320px, 36vw, 460px); background: #eeeeeb; }
-.map.is-live .map__live { display: block; }
+.map.is-live .map__live, .find__map.is-live .map__live { display: block; }
+.find__map .map__live { height: clamp(300px, 32vw, 400px); }
+.find__map.is-live .mapbox { display: none; }
 .map.is-live svg, .map.is-live figcaption { display: none; }
 .map__live [class*="balloon"] a { color: var(--accent); }
 .yard.is-active { box-shadow: inset 4px 0 0 var(--accent); }
