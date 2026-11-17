@@ -1,16 +1,17 @@
-# Собирает сайт и выкладывает его на хостинг:
-#  • при каждой правке кода в ветке main;
-#  • каждые 30 минут — если в Excel-файле на Яндекс Диске изменились цены;
-#  • вручную кнопкой Run workflow.
+# Цены и выкладка сайта.
+#  • Каждые 15 минут скачивает Excel-файл с Яндекс Диска (секрет PRICES_URL).
+#    Если цены изменились — сохраняет их в src/data/prices.json и пересобирает сайт:
+#    превью на GitHub Pages и хостинг (если он настроен).
+#  • При каждой правке кода в ветке main — то же самое, плюс выкладка кода.
+#  • Вручную кнопкой Run workflow (там же галочка для резкого изменения цен).
+# Репозиторий публичный, поэтому минуты GitHub Actions бесплатны.
 name: Сайт и цены
 
 on:
   push:
     branches: [main]
-  # Проверка цен каждые 30 минут. Включить, когда выбран вариант «обычный хостинг + GitHub»
-  # (при VPS цены обновляет сам сервер). Расход: ~1 500 минут Actions в месяц.
-  # schedule:
-  #   - cron: '7,37 * * * *'
+  schedule:
+    - cron: '4,19,34,49 * * * *'
   workflow_dispatch:
     inputs:
       allow_jump:
@@ -19,17 +20,23 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: write   # сохранить новые цены в репозитории
+  actions: write    # запустить пересборку превью на GitHub Pages
 
 concurrency:
   group: site
   cancel-in-progress: false
 
 jobs:
-  site:
+  prices:
+    name: Цены из Excel
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.prices.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -50,16 +57,38 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add src/data/prices.json
           git commit -m "Цены обновлены из Excel"
-          git push
+          git push || (git pull --rebase origin main && git push)
+
+      - name: Пересобрать превью на GitHub Pages
+        if: steps.prices.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main -R "${{ github.repository }}"
+
+  site:
+    name: Сборка и выкладка на хостинг
+    needs: prices
+    # Ошибка в Excel не мешает выложить правку кода: сайт соберётся со старыми ценами,
+    # а запуск всё равно будет помечен красным (упал шаг с ценами) — придёт письмо.
+    # По расписанию сайт собирается, только если цены действительно изменились.
+    if: always() && (github.event_name != 'schedule' || needs.prices.outputs.changed == 'true')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
 
       - name: Собрать сайт
-        if: github.event_name != 'schedule' || steps.prices.outputs.changed == 'true'
         env:
           SITE_NOINDEX: ${{ vars.SITE_NOINDEX }}
         run: npm run build
 
       - name: Выложить на хостинг
-        if: github.event_name != 'schedule' || steps.prices.outputs.changed == 'true'
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
