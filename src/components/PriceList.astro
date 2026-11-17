@@ -1,0 +1,34 @@
+---
+// Полный прайс по категориям (раскрывающиеся списки). Один и тот же блок на главной и на страницах площадок.
+// Цены берутся из prices.json, который автоматически обновляется из Excel-файла.
+// tone="white" — для белого фона (на главной перед блоком площадок, у которого серый фон).
+import { prices, rub, updatedText, updatedISO } from '../data/prices';
+interface Props { title: string; tone?: 'concrete' | 'white'; id?: string }
+const { title, tone = 'concrete', id = 'ceny' } = Astro.props;
+const groups = [...new Set(prices.map((p) => p.category))].map((c) => ({ name: c, rows: prices.filter((p) => p.category === c) }));
+---
+<section class:list={['section', { 'section--concrete': tone === 'concrete' }]} id={id}>
+  <div class="wrap">
+    <header class="section__head">
+      <h2>{title}</h2>
+      <p>Цены на <time datetime={updatedISO}>{updatedText}</time>. Одинаковые на всех площадках. Итог зависит от засора: его оценивают при приёмке.</p>
+    </header>
+    <div class:list={['pricelist', { 'pricelist--onwhite': tone === 'white' }]}>
+      {groups.map((g, i) => (
+        <details open={i < 2}>
+          <summary><span>{g.name}</span><small>{g.rows.length} позиций</small></summary>
+          <table>
+            <tbody>
+              {g.rows.map((r) => (
+                <tr class={typeof r.price === 'number' ? undefined : 'is-muted'}>
+                  <th scope="row">{r.name}</th>
+                  <td>{typeof r.price === 'number' ? <><b>{rub(r.price)}</b> {r.unit}</> : r.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

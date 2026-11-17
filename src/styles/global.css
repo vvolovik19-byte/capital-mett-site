@@ -359,6 +359,8 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
 .ph--wide { aspect-ratio: 3 / 2; }
 .pricelist { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
 .pricelist details { background: var(--white); }
+.pricelist--onwhite details { background: var(--concrete); }
+.pricelist--onwhite th, .pricelist--onwhite td { border-top-color: rgba(0, 0, 0, 0.08); }
 .pricelist summary { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; cursor: pointer; font: 500 1.0625rem/1.2 var(--font-head); list-style: none; }
 .pricelist summary::-webkit-details-marker { display: none; }
 .pricelist summary small { font: 400 0.8125rem var(--font-text); color: var(--steel); }

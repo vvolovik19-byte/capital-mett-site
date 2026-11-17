@@ -2,7 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
+import PriceList from '../components/PriceList.astro';
 import Services from '../components/Services.astro';
+import Steps from '../components/Steps.astro';
 import Yards from '../components/Yards.astro';
 import Calculator from '../components/Calculator.astro';
 import Sections from '../components/Sections.astro';
@@ -15,9 +17,11 @@ import Footer from '../components/Footer.astro';
   <Header />
   <main id="main">
     <Hero />
-    <Services />
+    <PriceList title="Цены на приём металлолома, макулатуры и пластика" tone="white" />
     <Yards />
     <Calculator />
+    <Steps photoAsk tone="section--concrete" />
+    <Services />
     <Sections />
   </main>
   <Footer />

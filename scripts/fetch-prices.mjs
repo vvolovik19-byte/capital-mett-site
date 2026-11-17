@@ -4,7 +4,7 @@
 // Если в таблице ошибка, prices.json не меняется: на сайте остаются старые цены,
 // а скрипт завершается с ошибкой — GitHub пришлёт письмо.
 import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
-import ExcelJS from 'exceljs';
+import { readSheet } from './read-xlsx.mjs';
 
 const OUT = new URL('../src/data/prices.json', import.meta.url);
 const HEADERS = ['Категория', 'Позиция', 'Цена', 'Единица', 'На главной'];
@@ -27,20 +27,11 @@ async function load() {
   return Buffer.from(await file.arrayBuffer());
 }
 
-// Значение ячейки как текст или число, без форматирования
-function plain(v) {
-  if (v == null) return '';
-  if (typeof v === 'object') {
-    if ('result' in v) return plain(v.result);
-    if ('richText' in v) return v.richText.map((t) => t.text).join('').trim();
-    if ('text' in v) return String(v.text).trim();
-    return String(v).trim();
-  }
-  return typeof v === 'string' ? v.replace(/ /g, ' ').trim() : v;
-}
+// Значение ячейки: число как есть, текст без лишних пробелов (неразрывные пробелы — в обычные)
+const plain = (v) => (typeof v === 'string' ? v.replace(/\u00a0/g, ' ').trim() : v ?? '');
 
 function parsePrice(v) {
-  if (typeof v === 'number') return v;
+  if (typeof v === 'number') return Math.round(v * 100) / 100;
   const s = String(v).toLowerCase();
   if (WORDS.includes(s)) return s;
   const n = Number(s.replace(/\s/g, '').replace(',', '.'));
@@ -56,18 +47,17 @@ if (!PRICES_URL && !PRICES_FILE) {
 const errors = [];
 let rows = [];
 try {
-  const wb = new ExcelJS.Workbook();
-  await wb.xlsx.load(await load());
-  const ws = wb.getWorksheet('Цены') ?? wb.worksheets[0];
-  const head = HEADERS.map((_, i) => plain(ws.getRow(1).getCell(i + 1).value));
+  const { rows: sheet } = await readSheet(await load(), 'Цены');
+  const cell = (n, i) => plain(sheet.get(n)?.[i]);
+  const head = HEADERS.map((_, i) => cell(1, i));
   if (head.join('|') !== HEADERS.join('|')) {
     errors.push(`Первая строка должна быть: ${HEADERS.join(' | ')}. Сейчас: ${head.join(' | ')}`);
   } else {
     const seen = new Set();
-    ws.eachRow({ includeEmpty: false }, (row, n) => {
-      if (n === 1) return;
-      const [category, name, rawPrice, rawUnit, rawFeat] = HEADERS.map((_, i) => plain(row.getCell(i + 1).value));
-      if ([category, name, rawPrice, rawUnit, rawFeat].every((c) => c === '')) return;
+    for (const n of [...sheet.keys()].sort((x, y) => x - y)) {
+      if (n === 1) continue;
+      const [category, name, rawPrice, rawUnit, rawFeat] = HEADERS.map((_, i) => cell(n, i));
+      if ([category, name, rawPrice, rawUnit, rawFeat].every((c) => c === '')) continue;
       const at = `Строка ${n}`;
       if (!category) errors.push(`${at}: пустая «Категория»`);
       if (!name) errors.push(`${at}: пустая «Позиция»`);
@@ -84,7 +74,7 @@ try {
       if (!['', 'да', 'нет'].includes(feat)) errors.push(`${at} («${name}»): в «На главной» пишите «да» или оставьте пусто`);
       if (feat === 'да' && typeof price !== 'number') errors.push(`${at} («${name}»): на главной можно показать только позицию с ценой-числом`);
       rows.push([category, name, price, unit, feat === 'да' ? 'да' : '']);
-    });
+    }
     if (rows.length < MIN_ROWS) errors.push(`В таблице всего ${rows.length} строк с ценами — похоже, файл обрезан (ждём не меньше ${MIN_ROWS})`);
     const nFeat = rows.filter((r) => r[4] === 'да').length;
     if (nFeat < FEATURED[0] || nFeat > FEATURED[1]) errors.push(`«да» в столбце «На главной» должно стоять у ${FEATURED.join('–')} позиций. Сейчас: ${nFeat}`);
@@ -115,7 +105,7 @@ if (JSON.stringify(rows) === JSON.stringify(current.rows)) {
   out('changed', 'false');
 } else {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Moscow' }).format(new Date());
-  const lines = rows.map((r) => '    ' + JSON.stringify(r)).join(',\n');
+  const lines = rows.map((r) => '    [' + r.map((v) => JSON.stringify(v)).join(', ') + ']').join(',\n');
   writeFileSync(OUT, `{\n  "updated": "${today}",\n  "rows": [\n${lines}\n  ]\n}\n`);
   console.log(`Цены обновлены: ${rows.length} позиций, дата ${today}.`);
   out('changed', 'true');

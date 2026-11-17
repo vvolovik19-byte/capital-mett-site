@@ -2,13 +2,13 @@
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import PriceBoard from '../../components/PriceBoard.astro';
+import PriceList from '../../components/PriceList.astro';
 import Terms from '../../components/Terms.astro';
 import Calculator from '../../components/Calculator.astro';
 import Chat from '../../components/Chat.astro';
 import Footer from '../../components/Footer.astro';
 import site from '../../data/site.json';
 import yards from '../../data/yards.json';
-import { prices, rub, updatedText, updatedISO } from '../../data/prices';
 import { route, liveMapKey, mapPoints } from '../../data/map';
 
 // Страница собирается для каждой площадки, у которой в yards.json заполнен блок "page".
@@ -25,7 +25,6 @@ const yandex = yard.yandex ?? `https://yandex.ru/maps/?text=${q}`;
 const routeUrl = route(yard);
 const google = `https://www.google.com/maps/search/?api=1&query=${q}`;
 const near = pg.near.map((s) => yards.find((y) => y.slug === s)!);
-const groups = [...new Set(prices.map((p) => p.category))].map((c) => ({ name: c, rows: prices.filter((p) => p.category === c) }));
 const path = `/punkty-priema/${yard.slug}`;
 
 const faq = [
@@ -122,31 +121,7 @@ const ld = [
       </div>
     </section>
 
-    <section class="section section--concrete" id="ceny">
-      <div class="wrap">
-        <header class="section__head">
-          <h2>Цены на площадке {pg.inCity}</h2>
-          <p>Цены на <time datetime={updatedISO}>{updatedText}</time>. Одинаковые на всех площадках. Итог зависит от засора: его оценивают при приёмке.</p>
-        </header>
-        <div class="pricelist">
-          {groups.map((g, i) => (
-            <details open={i < 2}>
-              <summary><span>{g.name}</span><small>{g.rows.length} позиций</small></summary>
-              <table>
-                <tbody>
-                  {g.rows.map((r) => (
-                    <tr class={typeof r.price === 'number' ? undefined : 'is-muted'}>
-                      <th scope="row">{r.name}</th>
-                      <td>{typeof r.price === 'number' ? <><b>{rub(r.price)}</b> {r.unit}</> : r.price}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
+    <PriceList title={`Цены на площадке ${pg.inCity}`} />
 
     <Calculator phone={phone} title="Посчитайте сумму до поездки" />
 
