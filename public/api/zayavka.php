@@ -4,12 +4,12 @@
  *
  * Настройки и пароли лежат НЕ в репозитории, а в файле zayavka-config.php
  * на хостинге на уровень выше папки сайта (выкладка с флагом --delete его не тронет):
- *   ~/test.capital-mett.com/public_html/        ← сайт (сюда выкладывает GitHub)
+ *   ~/test.capital-mett.com/docs/        ← сайт (сюда выкладывает GitHub)
  *   ~/test.capital-mett.com/zayavka-config.php  ← настройки (образец: docs/zayavka-config.example.php)
  *   ~/test.capital-mett.com/zayavki/            ← журнал заявок и ошибок (создаётся сам)
  *
  * Проверка из консоли хостинга (SSH):
- *   php ~/test.capital-mett.com/public_html/api/zayavka.php --test
+ *   php ~/test.capital-mett.com/docs/api/zayavka.php --test
  * отправит тестовую заявку и покажет, что дошло, а что нет и почему.
  */
 
