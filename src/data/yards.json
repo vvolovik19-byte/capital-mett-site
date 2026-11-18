@@ -40,7 +40,24 @@
     "lon": 37.259831,
     "yandex": "https://yandex.ru/maps/org/kapital_mett/8687848195/",
     "label": "left",
-    "mapLabel": "Одинцово"
+    "mapLabel": "Одинцово",
+    "page": {
+      "inCity": "в Одинцове",
+      "where": "на Железнодорожной",
+      "street": "ул. Железнодорожная",
+      "pickup": "по Одинцову и Одинцовскому округу",
+      "near": [
+        "odintsovo-yuzhnaya",
+        "istra",
+        "shchelkovo"
+      ],
+      "howToFind": null,
+      "photos": [
+        "Въезд на площадку",
+        "Весы",
+        "Вывеска с дороги"
+      ]
+    }
   },
   {
     "slug": "odintsovo-yuzhnaya",
@@ -53,7 +70,24 @@
     "lon": 37.25592,
     "yandex": "https://yandex.ru/maps/org/kapital_mett/226704747066/",
     "label": "",
-    "mapLabel": ""
+    "mapLabel": "",
+    "page": {
+      "inCity": "в Одинцове",
+      "where": "на Южной",
+      "street": "ул. Южная",
+      "pickup": "по Одинцову и Одинцовскому округу",
+      "near": [
+        "odintsovo-zheleznodorozhnaya",
+        "istra",
+        "shchelkovo"
+      ],
+      "howToFind": null,
+      "photos": [
+        "Въезд на площадку",
+        "Весы",
+        "Вывеска с дороги"
+      ]
+    }
   },
   {
     "slug": "pavlovskij-posad",
@@ -66,7 +100,23 @@
     "lon": 38.618761,
     "yandex": "https://yandex.ru/maps/org/kapital_mett/191917095960/",
     "label": "top",
-    "mapLabel": "Филимоново"
+    "mapLabel": "Филимоново",
+    "page": {
+      "inCity": "в Павловском Посаде",
+      "street": "Филимоново, ул. 1 Мая",
+      "pickup": "по Павловскому Посаду и Павлово-Посадскому округу",
+      "near": [
+        "vorovskogo",
+        "elektrougli",
+        "shchelkovo"
+      ],
+      "howToFind": null,
+      "photos": [
+        "Въезд на площадку",
+        "Весы",
+        "Вывеска с дороги"
+      ]
+    }
   },
   {
     "slug": "elektrougli",
@@ -79,7 +129,23 @@
     "lon": 38.193599,
     "yandex": null,
     "label": "bl",
-    "mapLabel": "Электроугли"
+    "mapLabel": "Электроугли",
+    "page": {
+      "inCity": "в Электроуглях",
+      "street": "ул. Железнодорожная",
+      "pickup": "по Электроуглям и Богородскому округу",
+      "near": [
+        "vorovskogo",
+        "pavlovskij-posad",
+        "shchelkovo"
+      ],
+      "howToFind": null,
+      "photos": [
+        "Въезд на площадку",
+        "Весы",
+        "Вывеска с дороги"
+      ]
+    }
   },
   {
     "slug": "vorovskogo",
@@ -92,7 +158,23 @@
     "lon": 38.340194,
     "yandex": "https://yandex.ru/maps/org/kapital_mett/158337384212/",
     "label": "br",
-    "mapLabel": "Воровского"
+    "mapLabel": "Воровского",
+    "page": {
+      "inCity": "в посёлке имени Воровского",
+      "street": "ул. Воровского",
+      "pickup": "по Богородскому округу, включая Ногинск",
+      "near": [
+        "elektrougli",
+        "pavlovskij-posad",
+        "shchelkovo"
+      ],
+      "howToFind": null,
+      "photos": [
+        "Въезд на площадку",
+        "Весы",
+        "Вывеска с дороги"
+      ]
+    }
   },
   {
     "slug": "shchelkovo",
@@ -105,6 +187,22 @@
     "lon": 37.953452,
     "yandex": "https://yandex.ru/maps/org/kapital_mett/201877275678/",
     "label": "right",
-    "mapLabel": "Щёлково"
+    "mapLabel": "Щёлково",
+    "page": {
+      "inCity": "в Щёлкове",
+      "street": "Фруктовый проезд",
+      "pickup": "по Щёлкову и Щёлковскому округу",
+      "near": [
+        "elektrougli",
+        "vorovskogo",
+        "pavlovskij-posad"
+      ],
+      "howToFind": null,
+      "photos": [
+        "Въезд на площадку",
+        "Весы",
+        "Вывеска с дороги"
+      ]
+    }
   }
 ]

@@ -17,6 +17,8 @@ export function getStaticPaths() {
 }
 const { yard } = Astro.props;
 const pg = yard.page!;
+// Если в городе несколько площадок, "where" отличает их в заголовке и описании: «в Одинцове на Южной»
+const place = 'where' in pg && pg.where ? `${pg.inCity} ${pg.where}` : pg.inCity;
 const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
 const phone = { text: yard.phones[0], href: tel(yard.phones[0]) };
 const q = encodeURIComponent('Капитал Метт, ' + yard.address);
@@ -38,7 +40,7 @@ const faq = [
 const ld = [
   {
     '@context': 'https://schema.org', '@type': 'LocalBusiness',
-    name: `${site.name} — приём металлолома ${pg.inCity}`,
+    name: `${site.name} — приём металлолома ${place}`,
     url: site.url + path, telephone: yard.phones[0],
     address: { '@type': 'PostalAddress', streetAddress: yard.address, addressRegion: 'Московская область', addressCountry: 'RU' },
     openingHoursSpecification: { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '00:00', closes: '23:59' },
@@ -58,7 +60,7 @@ const ld = [
   page="yard"
   path={path}
   title={`Приём металлолома ${pg.inCity} — круглосуточно, ${pg.street} | Капитал Метт`}
-  description={`Пункт приёма металлолома ${pg.inCity}: медь, латунь, алюминий, чёрный лом. От 1 кг, безналичный расчёт. Адрес, телефон, маршрут.`}
+  description={`Пункт приёма металлолома ${place}: медь, латунь, алюминий, чёрный лом. От 1 кг, безналичный расчёт. Адрес, телефон, маршрут.`}
   extraLd={ld}
 >
   <Header />
@@ -77,7 +79,7 @@ const ld = [
         <nav class="crumbs" aria-label="Хлебные крошки">
           <a href="/">Главная</a><a href="/punkty-priema">Пункты приёма</a><span aria-current="page">{yard.name}</span>
         </nav>
-        <h1 class="hero__title"><span class="hero__title-main">Приём металлолома {pg.inCity}</span></h1>
+        <h1 class="hero__title"><span class="hero__title-main">Приём металлолома {place}</span></h1>
         <p class="yardhead__addr">{yard.address}</p>
         <p class="yardhead__open"><i class="dot" aria-hidden="true"></i>Круглосуточно, без выходных</p>
         <div class="hero__actions">
@@ -121,7 +123,7 @@ const ld = [
       </div>
     </section>
 
-    <PriceList title={`Цены на площадке ${pg.inCity}`} />
+    <PriceList title={`Цены на площадке ${place}`} />
 
     <Calculator phone={phone} title="Посчитайте сумму до поездки" />
 
