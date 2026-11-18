@@ -14,3 +14,28 @@ RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.+?)/?$ $1.html [L]
 
 # Остальные 301-редиректы со старых адресов добавим перед переключением домена
+
+# ===== Скорость: сжатие и кэш =====
+# Сжимаем текстовые файлы при отдаче (если модуль есть на хостинге — RU-CENTER его поддерживает)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# Файлы из /assets/ (CSS, JS, шрифты) после сборки получают в имени отпечаток содержимого:
+# при любой правке имя меняется, поэтому браузер может хранить их год и не спрашивать сервер.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # Страницы всегда проверяются заново: цены обновляются каждые 15 минут
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Картинки и видео: неделя (имена у них без отпечатка, поэтому не навсегда)
+  <FilesMatch "\.(svg|png|jpe?g|webp|avif|mp4|webm|ico)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  # Браузер не угадывает тип файла сам — защита от подмены содержимого
+  Header always set X-Content-Type-Options "nosniff"
+  # Запрет встраивания сайта в чужие страницы (X-Frame-Options) не ставим: он ломает просмотр записей Вебвизора в Метрике
+</IfModule>

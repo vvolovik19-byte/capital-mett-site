@@ -82,8 +82,8 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
 .logo__mark { width: 26px; height: 26px; background: var(--accent); clip-path: polygon(0 0, 68% 0, 100% 32%, 100% 100%, 0 100%); }
 .logo__text { font: 600 1.0625rem/1 var(--font-head); letter-spacing: -0.01em; }
 .nav { display: flex; gap: 32px; font-size: 0.9375rem; font-weight: 500; }
-.nav a { text-decoration: none; padding-block: 8px; border-bottom: 1px solid transparent; }
-.nav a:hover { border-bottom-color: var(--graphite); }
+.nav a { padding-block: 8px; text-decoration: underline 1px transparent; text-underline-offset: 10px; transition: text-decoration-color 0.15s; }
+.nav a:hover { text-decoration-color: var(--graphite); }
 
 /* Мессенджеры */
 .chat { display: inline-flex; gap: 8px; align-items: center; }
@@ -129,6 +129,7 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
   background: linear-gradient(105deg, transparent 42%, rgba(169, 196, 240, 0.18) 50%, transparent 58%);
   animation: sheen 16s linear infinite;
 }
+.hero__sheen.is-paused { animation-play-state: paused; } /* блок ушёл с экрана — блик не крутим */
 @keyframes sheen { from { transform: translateX(-35%); } to { transform: translateX(35%); } }
 .hero__in { padding-block: clamp(40px, 8vw, 112px) clamp(32px, 5vw, 72px); }
 .hero__title { display: grid; gap: clamp(10px, 1.6vw, 20px); }
@@ -284,6 +285,8 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
 .check input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
 .form__msg { padding: 10px 12px; background: var(--concrete); border-left: 3px solid var(--ok); font-size: 0.875rem; }
 .form__msg.is-error { border-left-color: var(--warn); }
+.form input[aria-invalid="true"] { border-color: var(--warn); box-shadow: inset 0 0 0 1px var(--warn); }
+.check input[aria-invalid="true"] { outline: 2px solid var(--warn); outline-offset: 2px; }
 
 /* Вакансии */
 .jobs { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 5vw, 72px); align-items: start; }

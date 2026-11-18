@@ -43,7 +43,7 @@ import LeadForm from './LeadForm.astro';
 <section class="cta" id="zayavka">
   <div class="cta__media" aria-hidden="true">
     {site.ctaVideo
-      ? <video autoplay muted loop playsinline preload="none" poster={site.ctaVideo.poster}><source src={site.ctaVideo.src} type="video/mp4" /></video>
+      ? <video muted loop playsinline preload="none" width="1280" height="720" data-lazy-video data-poster={site.ctaVideo.poster}><source data-src={site.ctaVideo.src} type="video/mp4" /></video>
       : <div class="hero__sheen"></div>}
   </div>
   <div class="wrap cta__in">
