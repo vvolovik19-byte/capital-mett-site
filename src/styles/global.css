@@ -283,6 +283,7 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
 .form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 0.8438rem; color: var(--ink-2); line-height: 1.4; }
 .check input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .form__msg { padding: 10px 12px; background: var(--concrete); border-left: 3px solid var(--ok); font-size: 0.875rem; }
 .form__msg.is-error { border-left-color: var(--warn); }
 .form input[aria-invalid="true"] { border-color: var(--warn); box-shadow: inset 0 0 0 1px var(--warn); }

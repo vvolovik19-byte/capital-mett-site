@@ -9,7 +9,10 @@ const address = { order: 'Адрес объекта', estimate: 'Адрес об
 const what = { call: 'Что сдаёте (необязательно)', order: 'Что и сколько вывозим', estimate: 'Что нужно демонтировать' }[variant as string];
 ---
 <form class="form" id={id} action="/api/zayavka.php" method="post" data-form={variant} data-form-goal={goal} novalidate>
+  <input type="hidden" name="form" value={variant} />
   {service && <input type="hidden" name="service" value={service} />}
+  <!-- Ловушка для спам-ботов: поле скрыто от людей, заполнивших его обработчик отбрасывает -->
+  <label class="hp" aria-hidden="true">Сайт <input name="website" type="text" tabindex="-1" autocomplete="off" /></label>
   <label class="field"><span>Имя</span><input id={`${id}-name`} name="name" type="text" autocomplete="name" /></label>
   <label class="field"><span>Телефон</span><input id={`${id}-phone`} name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7" required /></label>
   {variant === 'rent' && (
