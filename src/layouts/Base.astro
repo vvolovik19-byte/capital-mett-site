@@ -2,6 +2,9 @@
 import '@fontsource-variable/onest/wght.css';
 import '@fontsource-variable/unbounded/wght.css';
 import '../styles/global.css';
+// Те же файлы, что подключает CSS шрифтов (одинаковый адрес после сборки) — браузер узнаёт о них сразу, а не после разбора CSS
+import fontHead from '@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2?url';
+import fontText from '@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2?url';
 import site from '../data/site.json';
 import yards from '../data/yards.json';
 import services from '../data/services.json';
@@ -47,6 +50,8 @@ const jsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="preload" as="font" type="font/woff2" href={fontHead} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={fontText} crossorigin />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     {(import.meta.env.SITE_NOINDEX || noindex) && <meta name="robots" content="noindex, nofollow" />}
@@ -56,6 +61,8 @@ const jsonLd = {
     <meta property="og:url" content={canonical} />
     <meta name="theme-color" content="#1C1F22" />
     <meta name="format-detection" content="telephone=no" />
+    {/* Обложка видео на первом экране — самое крупное, что видно сразу: грузим её первой */}
+    {page === 'home' && site.heroVideo?.poster && <link rel="preload" as="image" href={site.heroVideo.poster} fetchpriority="high" />}
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     {extraLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
     <!-- Яндекс Метрика (счётчик 87324352, с Вебвизором) подключается здесь перед запуском. -->

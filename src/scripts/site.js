@@ -16,6 +16,10 @@ function toast(text) {
 
 /* Цели Метрики: data-goal="phone" и т. п. */
 const goal = (name) => window.ym?.(METRIKA_ID, 'reachGoal', name);
+// Цели, которые достаточно засчитать один раз за просмотр страницы (например, калькулятор):
+// иначе каждое нажатие клавиши уходит в Метрику отдельным запросом.
+const reached = new Set();
+const goalOnce = (name) => { if (!reached.has(name)) { reached.add(name); goal(name); } };
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-goal]');
   if (el) goal(el.dataset.goal);
@@ -32,8 +36,20 @@ document.addEventListener('click', (e) => {
     if (option) option.selected = true;
     dlg.showModal();
   }
-  if (e.target.closest('[data-close]') || e.target.matches('dialog')) e.target.closest('dialog')?.close();
+  if (e.target.closest('[data-close]')) e.target.closest('dialog')?.close();
 });
+
+/* Закрытие окна нажатием по затемнению вокруг. Браузеры с closedby="any" (Chrome, Edge, Firefox) делают это сами.
+   Для остальных (Safari) проверяем, что нажали именно снаружи окна: нажатие на пустое место внутри окна
+   тоже приходит «на само окно», и раньше из-за этого форма закрывалась вместе с введённым телефоном. */
+if (!('closedBy' in HTMLDialogElement.prototype)) {
+  $$('dialog[closedby="any"]').forEach((dlg) => dlg.addEventListener('click', (e) => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    const inside = r.top <= e.clientY && e.clientY <= r.bottom && r.left <= e.clientX && e.clientX <= r.right;
+    if (!inside) dlg.close();
+  }));
+}
 
 /* Яндекс Карта: на главной — все площадки, на странице площадки — одна точка. Скрипт Яндекса грузится, только когда блок подходит к экрану,
    чтобы не замедлять первую загрузку. Если карта не загрузилась, остаётся схема. */
@@ -150,9 +166,23 @@ $$('form[data-form]').forEach((form) => {
     msg.classList.toggle('is-error', Boolean(error));
     msg.hidden = false;
   };
+  // Ошибка поля видна и для экранного диктора: aria-invalid + ссылка на текст ошибки.
+  // Ставится только после попытки отправить и снимается, как только поле поправили.
+  if (!msg.id) msg.id = `${form.id || 'form'}-msg`;
+  const mark = (field, bad) => {
+    if (bad) { field.setAttribute('aria-invalid', 'true'); field.setAttribute('aria-describedby', msg.id); }
+    else { field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby'); }
+  };
+  form.addEventListener('input', (e) => {
+    if (e.target.getAttribute('aria-invalid') !== 'true') return;
+    const ok = e.target === form.phone ? form.phone.value.replace(/\D/g, '').length >= 10 : e.target.checked;
+    if (ok) { mark(e.target, false); msg.hidden = true; }
+  });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const digits = form.phone.value.replace(/\D/g, '');
+    mark(form.phone, digits.length < 10);
+    mark(form.agree, !form.agree.checked);
     if (digits.length < 10) { say('Укажите телефон полностью, с кодом: +7 900 000-00-00', true); form.phone.focus(); return; }
     if (!form.agree.checked) { say('Отметьте согласие на обработку персональных данных', true); form.agree.focus(); return; }
     if (isPreview) { say('Это превью: заявка никуда не отправлена. На сайте она уйдёт на почту компании.'); return; }
@@ -196,7 +226,7 @@ if (calc) {
     const z = zasor[item.c] || 0;
     sum.textContent = `≈ ${fmt.format(kg * perKg * (1 - z / 100))} ₽`;
     note.textContent = z ? `Учли засор ${z} %. ${baseNote}` : baseNote;
-    if (track) goal('calc');
+    if (track) goalOnce('calc');
   }
   calc.addEventListener('input', (e) => {
     if (e.target.name === 'cat') fillItems();
@@ -223,8 +253,41 @@ $$('a.pin').forEach((pin) => pin.addEventListener('click', (e) => {
   setTimeout(() => card.classList.remove('is-picked'), 1800);
 }));
 
-/* Блоки мягко всплывают при прокрутке. Текст остаётся в HTML: поисковик видит его всегда */
 const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Блик на фоне первого экрана и блока заявки крутится, только пока блок виден:
+   за пределами экрана анимация впустую грузит видеокарту телефона. */
+const sheens = $$('.hero__sheen');
+if (sheens.length && 'IntersectionObserver' in window) {
+  // Следим за родителем (он в границах блока; сам блик шире экрана), а паузу ставим блику
+  const sheenIo = new IntersectionObserver((entries) => {
+    for (const en of entries) $('.hero__sheen', en.target)?.classList.toggle('is-paused', !en.isIntersecting);
+  });
+  sheens.forEach((el) => sheenIo.observe(el.parentElement));
+}
+
+/* Видео, которое автоматически играет на первом экране: при «уменьшить движение» в системе ставим на паузу */
+if (calm) $$('video[autoplay]').forEach((v) => { v.removeAttribute('autoplay'); v.pause(); });
+
+/* Видео ниже первого экрана (data-lazy-video) скачивается, только когда до него докрутили.
+   Атрибут autoplay заставил бы браузер качать файл сразу при открытии страницы. */
+const lazyVideos = $$('video[data-lazy-video]');
+if (lazyVideos.length && 'IntersectionObserver' in window) {
+  const videoIo = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (!en.isIntersecting) continue;
+      const v = en.target;
+      videoIo.unobserve(v);
+      if (v.dataset.poster) v.poster = v.dataset.poster;
+      $$('source[data-src]', v).forEach((s) => { s.src = s.dataset.src; });
+      v.load();
+      if (!calm) v.play().catch(() => {});
+    }
+  }, { rootMargin: '300px 0px' });
+  lazyVideos.forEach((v) => videoIo.observe(v));
+}
+
+/* Блоки мягко всплывают при прокрутке. Текст остаётся в HTML: поисковик видит его всегда */
 if (!calm && 'IntersectionObserver' in window) {
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }

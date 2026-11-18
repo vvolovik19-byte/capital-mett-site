@@ -1,5 +1,5 @@
 ---
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import site from '../data/site.json';
 import services from '../data/services.json';
 import Chat from './Chat.astro';
@@ -11,6 +11,9 @@ const nav = [
   { href: '/about', text: 'О компании' },
 ];
 const logo = existsSync('public/images/logo3.svg') ? '/images/logo3.svg' : null;
+// Ширина логотипа при высоте 36 px — по пропорциям из viewBox файла
+const vb = logo && readFileSync('public/images/logo3.svg', 'utf8').match(/viewBox=["']\s*[\d.-]+[\s,]+[\d.-]+[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+const logoW = vb ? Math.round((36 * Number(vb[1])) / Number(vb[2])) : undefined;
 ---
 <header class="head">
   <div class="topline">
@@ -25,7 +28,7 @@ const logo = existsSync('public/images/logo3.svg') ? '/images/logo3.svg' : null;
   <div class="wrap head__in">
     <a class="logo" href="/" aria-label="Капитал Метт — на главную">
       {logo
-        ? <img src={logo} alt="Капитал Метт" height="36" />
+        ? <img src={logo} alt="Капитал Метт" width={logoW} height="36" />
         : <><span class="logo__mark" aria-hidden="true"></span><span class="logo__text">Капитал Метт</span></>}
     </a>
     <nav class="nav" aria-label="Основное меню">
