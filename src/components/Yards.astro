@@ -1,6 +1,12 @@
 ---
 import yards from '../data/yards.json';
 import { route, liveMapKey, mapPoints } from '../data/map';
+// На главной блок называется «7 площадок в Подмосковье», на странице /punkty-priema — по-своему
+interface Props { title?: string; lead?: string }
+const {
+  title = '7 площадок в Подмосковье',
+  lead = 'Цены и правила приёма одинаковые на всех площадках. Выберите ближайшую и позвоните прямо туда.',
+} = Astro.props;
 const W = 640, H = 330;
 const box = { lonMin: 36.55, lonMax: 38.95, latMin: 55.48, latMax: 56.08 };
 const px = (lon: number) => +(((lon - box.lonMin) / (box.lonMax - box.lonMin)) * W).toFixed(1);
@@ -23,8 +29,8 @@ const labelPos = { left: { dx: -12, dy: 4, a: 'end' }, right: { dx: 12, dy: 4, a
 <section class="section section--concrete" id="ploshchadki">
   <div class="wrap">
     <header class="section__head" data-reveal>
-      <h2>7 площадок в Подмосковье</h2>
-      <p>Цены и правила приёма одинаковые на всех площадках. Выберите ближайшую и позвоните прямо туда.</p>
+      <h2>{title}</h2>
+      <p>{lead}</p>
     </header>
     <div class="yards">
       <figure class="map" data-reveal data-ymap={liveMap} data-ymap-points={liveMap ? mapData : undefined}>

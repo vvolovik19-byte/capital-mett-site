@@ -1,4 +1,4 @@
-// Карта сайта: главная, готовые страницы площадок и страницы услуг.
+// Карта сайта: главная, список площадок, готовые страницы площадок и страницы услуг.
 import site from '../data/site.json';
 import yards from '../data/yards.json';
 import services from '../data/services.json';
@@ -6,6 +6,7 @@ import services from '../data/services.json';
 export function GET() {
   const paths = [
     '/',
+    '/punkty-priema/',
     ...yards.filter((y) => 'page' in y && y.page).map((y) => `/punkty-priema/${y.slug}`),
     ...services.map((s) => `/uslugi/${s.slug}`),
   ];

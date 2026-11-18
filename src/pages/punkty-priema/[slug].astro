@@ -48,7 +48,7 @@ const ld = [
   },
   {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
-    itemListElement: [['Главная', '/'], ['Пункты приёма', '/punkty-priema'], [yard.name, path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+    itemListElement: [['Главная', '/'], ['Пункты приёма', '/punkty-priema/'], [yard.name, path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
   },
   {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -77,7 +77,7 @@ const ld = [
       </div>
       <div class="wrap hero__in">
         <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="/">Главная</a><a href="/punkty-priema">Пункты приёма</a><span aria-current="page">{yard.name}</span>
+          <a href="/">Главная</a><a href="/punkty-priema/">Пункты приёма</a><span aria-current="page">{yard.name}</span>
         </nav>
         <h1 class="hero__title"><span class="hero__title-main">Приём металлолома {place}</span></h1>
         <p class="yardhead__addr">{yard.address}</p>
@@ -169,7 +169,7 @@ const ld = [
             </li>
           ))}
         </ul>
-        <p class="allyards"><a class="textlink" href="/punkty-priema">Все 7 площадок</a></p>
+        <p class="allyards"><a class="textlink" href="/punkty-priema/">Все 7 площадок</a></p>
       </div>
     </section>
   </main>

@@ -1,0 +1,73 @@
+---
+// Список всех площадок: /punkty-priema/ (со слешем: файл кладётся в папку площадок, см. astro.config.mjs). Сюда ведут хлебные крошки и «Все 7 площадок» со страниц площадок.
+// Карта и карточки — тот же блок, что на главной; данные из src/data/yards.json.
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import PriceBoard from '../components/PriceBoard.astro';
+import Terms from '../components/Terms.astro';
+import Yards from '../components/Yards.astro';
+import PriceList from '../components/PriceList.astro';
+import Calculator from '../components/Calculator.astro';
+import Chat from '../components/Chat.astro';
+import Footer from '../components/Footer.astro';
+import site from '../data/site.json';
+import yards from '../data/yards.json';
+
+const path = '/punkty-priema/';
+const ld = [
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [['Главная', '/'], ['Пункты приёма', path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'ItemList',
+    name: 'Пункты приёма металлолома Капитал Метт',
+    itemListElement: yards.map((y, i) => ({ '@type': 'ListItem', position: i + 1, name: `${site.name} — ${y.name}`, url: `${site.url}${path}${y.slug}` })),
+  },
+];
+---
+<Base
+  page="yards"
+  path={path}
+  title="Пункты приёма металлолома в Подмосковье — адреса 7 площадок | Капитал Метт"
+  description="7 пунктов приёма металлолома Капитал Метт: Истра, Одинцово, Щёлково, Электроугли, пос. Воровского, Павловский Посад. Круглосуточно, от 1 кг. Адреса, телефоны, карта."
+  extraLd={ld}
+>
+  <Header />
+  <main id="main">
+    <section class="hero hero--yard">
+      <div class="hero__media" aria-hidden="true">
+        <svg class="hero__steel" preserveAspectRatio="none">
+          <filter id="steel" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.75" numOctaves="3" seed="11" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.55 0 0 0 -0.12" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#steel)" />
+        </svg>
+      </div>
+      <div class="wrap hero__in">
+        <nav class="crumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a><span aria-current="page">Пункты приёма</span>
+        </nav>
+        <h1 class="hero__title"><span class="hero__title-main">Пункты приёма металлолома в&nbsp;Подмосковье</span></h1>
+        <p class="hero__lead">7 площадок вокруг Москвы: Истра и Одинцово на западе, Щёлково, Электроугли, посёлок Воровского и Павловский Посад на востоке. Работаем круглосуточно, без выходных.</p>
+        <div class="hero__actions">
+          <a class="btn btn--accent btn--big" href={site.phone.href} data-goal="phone">
+            <span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span>
+          </a>
+          <a class="btn btn--line-light btn--big" href="#ploshchadki">Ближайшая площадка</a>
+          <Chat variant="dark" />
+        </div>
+      </div>
+      <PriceBoard allHref="#ceny" />
+    </section>
+    <Terms />
+
+    <Yards title="Адреса и телефоны" />
+
+    <PriceList title="Цены на всех площадках" />
+
+    <Calculator title="Посчитайте сумму до поездки" />
+  </main>
+  <Footer />
+</Base>
