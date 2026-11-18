@@ -185,9 +185,11 @@ $$('form[data-form]').forEach((form) => {
     mark(form.agree, !form.agree.checked);
     if (digits.length < 10) { say('Укажите телефон полностью, с кодом: +7 900 000-00-00', true); form.phone.focus(); return; }
     if (!form.agree.checked) { say('Отметьте согласие на обработку персональных данных', true); form.agree.focus(); return; }
-    if (isPreview) { say('Это превью: заявка никуда не отправлена. На сайте она уйдёт на почту компании.'); return; }
+    if (isPreview) { say('Это превью: заявка никуда не отправлена. На сайте она уйдёт на почту и в Telegram.'); return; }
     try {
-      const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+      const data = new FormData(form);
+      data.append('page', location.pathname + location.search); // с какой страницы и с какой рекламы пришла заявка
+      const res = await fetch(form.action, { method: 'POST', body: data });
       if (!res.ok) throw new Error(String(res.status));
       form.reset();
       say('Заявка отправлена. Перезвоним в ближайшее время.');
