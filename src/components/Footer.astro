@@ -3,13 +3,17 @@ import site from '../data/site.json';
 import yards from '../data/yards.json';
 import services from '../data/services.json';
 import LeadForm from './LeadForm.astro';
+const r = site.requisites;
+const req = r.inn
+  ? [site.legalName, `ИНН ${r.inn}`, r.ogrn && `ОГРН ${r.ogrn}`, r.address].filter(Boolean).join(', ')
+  : `${site.legalName}. ИНН, ОГРН и юридический адрес добавим перед запуском.`;
 ---
 <footer class="foot">
   <div class="wrap foot__in">
     <div class="foot__col">
       <p class="foot__name">Капитал Метт</p>
       <p>Приём металлолома, макулатуры и пластика в Москве и Московской области. Круглосуточно.</p>
-      <p class="foot__req">{site.requisites ?? `${site.legalName}. ИНН, ОГРН и юридический адрес добавим перед запуском.`}</p>
+      <p class="foot__req">{req} <a href="/about#rekvizity">Реквизиты</a></p>
     </div>
     <div class="foot__col">
       <h2>Контакты</h2>

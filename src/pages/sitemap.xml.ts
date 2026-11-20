@@ -9,6 +9,7 @@ export function GET() {
     '/punkty-priema/',
     ...yards.filter((y) => 'page' in y && y.page).map((y) => `/punkty-priema/${y.slug}`),
     ...services.map((s) => `/uslugi/${s.slug}`),
+    '/about',
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths
     .map((p) => `  <url><loc>${new URL(p, site.url).href}</loc></url>`)

@@ -1,0 +1,247 @@
+---
+// «О компании»: /about (тот же адрес, что на старом сайте). Сюда ведут меню, подвал, блок «О компании» на главной
+// и ссылка «Реквизиты и лицензия» со страниц услуг (/about#rekvizity).
+// Реквизиты и сканы лицензии — в src/data/site.json → requisites; вакансии — там же, jobs.
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Services from '../components/Services.astro';
+import Steps from '../components/Steps.astro';
+import LeadForm from '../components/LeadForm.astro';
+import Chat from '../components/Chat.astro';
+import Footer from '../components/Footer.astro';
+import site from '../data/site.json';
+import yards from '../data/yards.json';
+
+const path = '/about';
+const title = `О компании «${site.name}» — приём металлолома в Подмосковье с ${site.since} года`;
+const description = `${site.legalName} с ${site.since} года принимает металлолом, макулатуру и пластик в Москве и области: ${yards.length} площадок, свой автопарк, лицензия на лом, договор с компаниями.`;
+const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
+const r = site.requisites;
+
+// Реквизиты: пустое поле показываем как «добавим перед запуском»
+const reqs: { label: string; value: string | null; href?: string }[] = [
+  { label: 'Полное наименование', value: `Общество с ограниченной ответственностью «${site.name}»` },
+  { label: 'Сокращённое наименование', value: site.legalName },
+  { label: 'ИНН', value: r.inn },
+  { label: 'КПП', value: r.kpp },
+  { label: 'ОГРН', value: r.ogrn },
+  { label: 'Юридический адрес', value: r.address },
+  { label: 'Лицензия на лом', value: r.license },
+  { label: 'Телефон', value: site.phone.text, href: site.phone.href },
+  { label: 'Почта', value: site.email, href: `mailto:${site.email}` },
+];
+const scans: { src: string; alt: string }[] = r.licenseScans;
+
+const ld = [
+  {
+    '@context': 'https://schema.org', '@type': 'AboutPage',
+    name: title, description, url: site.url + path,
+    mainEntity: { '@type': 'Organization', name: site.name, legalName: site.legalName, url: site.url, foundingDate: String(site.since), telephone: site.phone.text, email: site.email },
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [['Главная', '/'], ['О компании', path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+  },
+];
+---
+<Base page="about" path={path} title={title} description={description} extraLd={ld}>
+  <Header />
+  <main id="main">
+    <section class="hero hero--yard hero--service">
+      <div class="hero__media" aria-hidden="true">
+        <svg class="hero__steel" preserveAspectRatio="none">
+          <filter id="steel" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.75" numOctaves="3" seed="11" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.55 0 0 0 -0.12" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#steel)" />
+        </svg>
+      </div>
+      <div class="wrap hero__in">
+        <nav class="crumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a><span aria-current="page">О компании</span>
+        </nav>
+        <h1 class="hero__title"><span class="hero__title-main">О компании «{site.name}»</span></h1>
+        <p class="hero__lead">С {site.since} года принимаем металлолом, макулатуру и пластик в Москве и Московской области. {yards.length} площадок работают круглосуточно, свой автопарк забирает лом с объектов, бригада демонтажа разбирает металлоконструкции.</p>
+        <div class="hero__actions">
+          <a class="btn btn--accent btn--big hero__call" href={site.phone.href} data-goal="phone">
+            <span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span>
+          </a>
+          <a class="btn btn--line-light btn--big" href="/punkty-priema/">Площадки на карте</a>
+          <Chat variant="dark" />
+        </div>
+      </div>
+    </section>
+
+    <section class="terms" aria-label="Коротко о компании">
+      <ul class="wrap terms__list">
+        <li><b>С {site.since} года</b><span>принимаем лом в Москве и области</span></li>
+        <li><b>{yards.length} площадок</b><span>в Подмосковье, круглосуточно</span></li>
+        <li><b>Лицензия</b><span>на лом чёрных и цветных металлов</span></li>
+        <li><b>Свой автопарк</b><span>вывоз и демонтаж на объекте</span></li>
+      </ul>
+    </section>
+
+    <section class="section" id="kto-my">
+      <div class="wrap about">
+        <div class="about__text" data-reveal>
+          <h2>Принимаем вторсырьё с {site.since} года</h2>
+          <p class="about__lead">{site.legalName} — компания по приёму металлолома, макулатуры и пластика. Работаем и с компаниями, и с частными лицами, примерно поровну.</p>
+          <p>Площадки стоят вокруг Москвы: Истра и две в Одинцове на западе, Щёлково, Электроугли, посёлок Воровского и Павловский Посад на востоке. Все работают круглосуточно, без выходных, и принимают по одним ценам.</p>
+          <p>Принимаем чёрный лом (сталь, чугун, оцинковку, стружку) и цветной (медь, латунь, алюминий, нержавейку, свинец, цинк, аккумуляторы). Цены обновляем на сайте, как только они меняются, а сумму можно прикинуть в <a href="/#kalkulyator">калькуляторе</a>.</p>
+          <dl class="facts">
+            <div><dt>{site.since}</dt><dd>год основания</dd></div>
+            <div><dt>{yards.length}</dt><dd>площадок приёма</dd></div>
+            <div><dt>24/7</dt><dd>принимаем лом</dd></div>
+          </dl>
+        </div>
+        <div class="about__photos" data-reveal>
+          <div class="ph ph--tall"><span>Фото: площадка и техника</span></div>
+          <div class="ph"><span>Фото: команда на площадке</span></div>
+        </div>
+        <div class="clients" data-reveal>
+          <h3>Нам доверяют</h3>
+          <ul>
+            {[1, 2, 3, 4].map((i) => <li><span>Логотип клиента {i}</span></li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <Services title="Что мы делаем" text="Кроме приёма на площадках забираем лом с объекта, разбираем конструкции, даём технику с водителем и покупаем партии у предприятий." tone="section--concrete" />
+
+    <section class="section" id="komu">
+      <div class="wrap">
+        <header class="section__head" data-reveal>
+          <h2>Компаниям и частным лицам</h2>
+          <p>Условия приёма одинаковые на всех площадках. Отличается только оформление.</p>
+        </header>
+        <div class="twocol audience">
+          <div class="audience__col" data-reveal>
+            <h3>Компаниям</h3>
+            <ul class="ticks">
+              <li><b>Договор:</b> с организациями работаем по договору.</li>
+              <li><b>Оплата на счёт</b> организации, только безналичный расчёт.</li>
+              <li><b>Документы:</b> на каждую партию оформляем приёмо-сдаточный акт.</li>
+              <li><b>Цена партии</b> по договорённости — назовём по телефону.</li>
+              <li><b>Вывоз и демонтаж</b> своей техникой и бригадой.</li>
+            </ul>
+            <p class="audience__act">
+              <a class="btn btn--accent" href={site.phone.href} data-goal="phone"><span class="btn__label">Обсудить партию</span><span class="btn__num">{site.phone.text}</span></a>
+            </p>
+          </div>
+          <div class="audience__col" data-reveal>
+            <h3>Частным лицам</h3>
+            <ul class="ticks">
+              <li><b>От 1 кг</b> — минимальной партии нет.</li>
+              <li><b>Паспорт</b> обязателен: без него принять лом не сможем.</li>
+              <li><b>Оплата на карту</b> переводом — наличными не платим.</li>
+              <li><b>Круглосуточно</b> и без записи, на любой из {yards.length} площадок.</li>
+              <li><b>Фото лома</b> можно прислать в мессенджер — подскажем цену заранее.</li>
+            </ul>
+            <p class="audience__act"><Chat variant="button" /></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Steps
+      id="dalshe"
+      title="Что происходит с ломом дальше"
+      text="Металл можно переплавлять снова и снова без потери качества, поэтому лом — полноценное сырьё для заводов."
+      tone="section--concrete"
+      items={[
+        ['Приём и взвешивание', 'Взвешиваем при вас — на площадке или на объекте, учитываем засор и оформляем приёмо-сдаточный акт.'],
+        ['Сортировка', 'Разделяем лом по видам и маркам: сталь, чугун, медь, латунь, алюминий. Чем чище сортировка, тем ценнее сырьё.'],
+        ['Подготовка', 'Крупные конструкции режем на габаритные куски и собираем лом в партии для отгрузки.'],
+        ['Переплавка', 'Партии уходят на металлургические и перерабатывающие заводы, где из них выплавляют новую сталь и цветные металлы.'],
+      ]}
+    />
+
+    <section class="section" id="rekvizity">
+      <div class="wrap twocol">
+        <div class="prose" data-reveal>
+          <h2>Лицензия и реквизиты</h2>
+          <p>Работаем по лицензии на заготовку, хранение, переработку и реализацию лома чёрных и цветных металлов. С компаниями заключаем договор, на каждую партию оформляем приёмо-сдаточный акт.</p>
+          <p>Копию лицензии и карточку компании для договора пришлём по почте — напишите на <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+          <dl class="reqs">
+            {reqs.map((q) => (
+              <div>
+                <dt>{q.label}</dt>
+                {q.value
+                  ? <dd>{q.href ? <a href={q.href} data-goal={q.href.startsWith('tel:') ? 'phone' : undefined}>{q.value}</a> : q.value}</dd>
+                  : <dd><span class="is-todo">добавим перед запуском</span></dd>}
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div class="license" data-reveal>
+          <h3>Лицензия</h3>
+          <ul class="license__scans">
+            {scans.length
+              ? scans.map((s) => <li><a href={s.src} target="_blank" rel="noopener"><img src={s.src} alt={s.alt} loading="lazy" /></a></li>)
+              : ['Скан лицензии, стр. 1', 'Скан лицензии, стр. 2'].map((t) => <li class="ph ph--doc"><span>{t}</span></li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight section--concrete" id="ploshchadki">
+      <div class="wrap">
+        <header class="subhead subhead--first">
+          <h2>Наши площадки</h2>
+          <p><a class="textlink" href="/punkty-priema/">Все площадки на карте</a></p>
+        </header>
+        <ul class="yardmini">
+          {yards.map((y) => (
+            <li>
+              <a class="yardmini__name" href={`/punkty-priema/${y.slug}`}>{y.name}</a>
+              <span>{y.address}</span>
+              <a class="yardmini__tel" href={tel(y.phones[0])} data-goal="phone">{y.phones[0]}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section section--tight" id="vakansii">
+      <div class="wrap jobs">
+        <header data-reveal>
+          <h2>Вакансии</h2>
+          <p>Ищем людей на площадки и в автопарк. Звоните по номеру вакансии.</p>
+        </header>
+        <ul>
+          {site.jobs.map((j) => (
+            <li data-reveal><h3>{j.title}</h3><a href={j.href}>{j.phone}</a></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="channel" id="kanal">
+      <div class="wrap channel__in" data-reveal>
+        <div>
+          <h2>Новости компании и цены — в Telegram-канале</h2>
+          <p>Пишем, когда меняются цены на лом, рассказываем о площадках и вакансиях.</p>
+        </div>
+        <a class="btn btn--white btn--big" href={site.telegram} target="_blank" rel="noopener" data-goal="channel">Открыть канал @capitalmett</a>
+      </div>
+    </section>
+
+    <section class="cta" id="zayavka">
+      <div class="cta__media" aria-hidden="true"><div class="hero__sheen"></div></div>
+      <div class="wrap cta__in">
+        <div class="cta__text" data-reveal>
+          <h2>Есть партия металла? Позвоните</h2>
+          <p>Спросим, что и сколько вы сдаёте, и назовём цену за один звонок.</p>
+          <a class="cta__phone" href={site.phone.href} data-goal="phone">{site.phone.text}</a>
+          <p class="cta__sub">Круглосуточно. Или оставьте телефон — перезвоним сами.</p>
+        </div>
+        <div class="cta__form" data-reveal>
+          <LeadForm id="lead" submit="Перезвоните мне" />
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>

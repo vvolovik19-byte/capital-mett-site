@@ -7,12 +7,14 @@ const services = [
   { n: '04', title: 'Партии для предприятий', href: site.phone.href, more: 'Обсудить партию по телефону', goal: 'phone',
     text: 'Принимаем лом партиями с производств и строек. Договор и безналичная оплата на счёт организации. Цену назовём по телефону.' },
 ];
+interface Props { title?: string; text?: string; tone?: string }
+const { title = 'Услуги для компаний', text = 'Забираем лом с объекта, разбираем конструкции и даём технику с водителем.', tone = '' } = Astro.props;
 ---
-<section class="section" id="uslugi">
+<section class:list={['section', tone]} id="uslugi">
   <div class="wrap">
     <header class="section__head" data-reveal>
-      <h2>Услуги для компаний</h2>
-      <p>Забираем лом с объекта, разбираем конструкции и даём технику с водителем.</p>
+      <h2>{title}</h2>
+      <p>{text}</p>
     </header>
     <ol class="services">
       {services.map((s) => (

@@ -17,7 +17,15 @@
   "ymapsKey": "f19dcb35-0830-41ac-9659-26d5feab4cb8",
   "heroVideo": null,
   "ctaVideo": null,
-  "requisites": null,
+  "requisites": {
+    "_comment": "Реквизиты для страницы «О компании» (/about#rekvizity) и подвала. Пустое поле (null) на сайте показывается как «добавим перед запуском». licenseScans — сканы лицензии: файлы положить в public/docs/ и вписать сюда, например [{ \"src\": \"/docs/licenziya-1.jpg\", \"alt\": \"Лицензия, страница 1\" }].",
+    "inn": null,
+    "kpp": null,
+    "ogrn": null,
+    "address": null,
+    "license": null,
+    "licenseScans": []
+  },
   "jobs": [
     {
       "title": "Водитель на Газель",
