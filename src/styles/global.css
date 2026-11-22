@@ -677,6 +677,45 @@ h3 { font-size: 1.0625rem; line-height: 1.3; }
 .reqs .is-todo { display: inline-block; padding: 1px 8px; border: 1px dashed #a9adb3; font-weight: 400; font-size: 0.8438rem; color: var(--steel); }
 .license__scans img { width: 100%; aspect-ratio: 210 / 297; object-fit: cover; border: 1px solid var(--line); }
 .subhead--first { margin-top: 0; }
+
+/* ===== Страница «Цены» (/tseny) ===== */
+.pricenav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.pricenav a { display: inline-flex; align-items: baseline; gap: 8px; padding: 9px 16px; border: 1px solid var(--line); background: var(--white); font-weight: 600; font-size: 0.9375rem; text-decoration: none; color: var(--graphite); transition: border-color 0.15s, color 0.15s; }
+.pricenav a:hover { border-color: var(--accent); color: var(--accent); }
+.pricenav small { font-weight: 400; font-size: 0.8125rem; color: var(--steel); }
+.pricegrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.pricecat { background: var(--concrete); scroll-margin-top: calc(var(--head-h) + 16px); }
+.pricecat h3 { padding: 18px 20px 14px; font: 500 1.25rem/1.2 var(--font-head); letter-spacing: -0.01em; }
+.pricecat table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.pricecat thead th { padding: 0 20px 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--steel); text-align: left; }
+.pricecat thead th:last-child { text-align: right; }
+.pricecat tbody th, .pricecat td { padding: 10px 20px; border-top: 1px solid rgba(0, 0, 0, 0.08); vertical-align: baseline; }
+.pricecat tbody th { text-align: left; font-weight: 400; }
+.pricecat td { text-align: right; white-space: nowrap; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.pricecat td b { color: var(--accent); font-weight: 700; font-size: 1.0625rem; }
+.pricecat td a { font-weight: 600; color: var(--accent); text-underline-offset: 3px; }
+.pricecat .is-muted th, .pricecat .is-muted td { color: var(--steel); }
+.pricenote { margin-top: 20px; color: var(--ink-2); }
+.pricenote a { font-weight: 600; color: var(--accent); white-space: nowrap; text-underline-offset: 4px; }
+.yardlist--prices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.yardlist--prices .yard__addr a { color: inherit; text-decoration-color: rgba(36, 89, 179, 0.35); text-underline-offset: 4px; }
+.yardlist--prices .yard__addr a:hover { color: var(--accent); text-decoration-color: currentColor; }
+.yardlist--prices .yard { grid-template-columns: minmax(0, 1fr); }
+.yard--all { padding: 0; background: var(--accent); }
+.yard--all a { display: grid; align-content: end; gap: 6px; height: 100%; min-height: 150px; padding: 20px; color: var(--white); text-decoration: none; }
+.yard--all b { font: 500 1.25rem/1.2 var(--font-head); }
+.yard--all b::after { content: ' →'; }
+.yard--all span { font-size: 0.875rem; opacity: 0.8; }
+.yard--all a:hover b { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 1100px) { .yardlist--prices { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .pricegrid, .yardlist--prices { grid-template-columns: minmax(0, 1fr); }
+  .pricecat tbody th, .pricecat td { padding: 10px 14px; }
+  .pricecat h3 { padding: 16px 14px 12px; }
+  .pricecat thead th { padding: 0 14px 8px; }
+  .pricecat tbody th { overflow-wrap: anywhere; }
+  .yard--all a { min-height: 0; }
+}
 @media (max-width: 760px) {
   .reqs div { grid-template-columns: minmax(0, 1fr); }
   .audience__act .btn--accent, .audience__act .chat { width: 100%; }

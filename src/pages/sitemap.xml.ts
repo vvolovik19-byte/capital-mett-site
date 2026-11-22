@@ -6,6 +6,7 @@ import services from '../data/services.json';
 export function GET() {
   const paths = [
     '/',
+    '/tseny',
     '/punkty-priema/',
     ...yards.filter((y) => 'page' in y && y.page).map((y) => `/punkty-priema/${y.slug}`),
     ...services.map((s) => `/uslugi/${s.slug}`),

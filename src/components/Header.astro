@@ -4,7 +4,7 @@ import site from '../data/site.json';
 import services from '../data/services.json';
 import Chat from './Chat.astro';
 const nav = [
-  { href: '/#ceny', text: 'Цены' },
+  { href: '/tseny', text: 'Цены' },
   { href: '/#uslugi', text: 'Услуги', sub: services.map((s) => ({ href: `/uslugi/${s.slug}`, text: s.nav })) },
   { href: '/#ploshchadki', text: 'Площадки' },
   { href: '/#kalkulyator', text: 'Калькулятор' },

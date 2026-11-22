@@ -1,0 +1,197 @@
+---
+// «Цены»: /tseny — тот же адрес, что на старом сайте (его находят в поиске Яндекса по запросам о ценах).
+// Все цены — из Excel через src/data/prices.json, страница пересобирается сама при обновлении прайса.
+// Внизу — все площадки с адресами-ссылками на их страницы.
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import PriceBoard from '../components/PriceBoard.astro';
+import Terms from '../components/Terms.astro';
+import Calculator from '../components/Calculator.astro';
+import Chat from '../components/Chat.astro';
+import Footer from '../components/Footer.astro';
+import site from '../data/site.json';
+import yards from '../data/yards.json';
+import { route } from '../data/map';
+import { prices, rub, updatedText, updatedISO } from '../data/prices';
+
+const path = '/tseny';
+const tel = (p: string) => 'tel:+' + p.replace(/\D/g, '');
+
+// Разделы прайса в порядке из Excel; у каждого свой якорь для меню над таблицами
+const slugs: Record<string, string> = { 'Чёрный металлолом': 'chernyj-lom', 'Цветной металлолом': 'tsvetnoj-lom', 'Пластик': 'plastik', 'Макулатура': 'makulatura' };
+const groups = [...new Set(prices.map((p) => p.category))].map((c, i) => ({
+  name: c, id: slugs[c] ?? `razdel-${i + 1}`, rows: prices.filter((p) => p.category === c),
+}));
+
+// Пример «сортировка влияет на цену» — из самого прайса; если позиций нет, пример не показываем
+const priceOf = (name: string) => prices.find((p) => p.name === name && typeof p.price === 'number');
+const alHi = priceOf('Электротехнический алюминий');
+const alLo = priceOf('Алюминий микс');
+const sortExample = alHi && alLo
+  ? ` Например, электротехнический алюминий — ${rub(alHi.price as number)} ${alHi.unit}, а алюминий микс — ${rub(alLo.price as number)} ${alLo.unit}.`
+  : '';
+
+const faq: string[][] = [
+  ['Цены одинаковые на всех площадках?', `Да. Прайс один для всех ${yards.length} площадок, так что выбирайте ту, что ближе.`],
+  ['Почему на площадке сумма может отличаться от калькулятора?', 'Калькулятор показывает примерную сумму по прайсу. Точную называют после взвешивания и проверки засора: земля, краска, масло и неметаллические части уменьшают итог.'],
+  ['Как часто меняются цены?', 'Часто: цены на лом следуют за рынком металлов. Прайс на сайте обновляем, как только они меняются. Дата обновления указана над таблицей.'],
+  ['Как узнать цену на большую партию?', `Позвоните: ${site.phone.text}. Для меди и латуни от 100 кг и для партий с предприятий цена договорная.`],
+  ['Как вы платите?', 'Только безналичным расчётом: переводом на карту или на счёт организации. Частным лицам нужен паспорт.'],
+  ['Можно узнать цену по фото?', 'Да. Пришлите фото лома в Telegram или WhatsApp: подскажем, что это за лом, и назовём примерную цену.'],
+];
+
+const title = 'Цены на металлолом сегодня — приём лома в Москве и области | Капитал Метт';
+const description = `Актуальные цены на приём чёрного и цветного металлолома, макулатуры и пластика на ${yards.length} площадках Капитал Метт в Подмосковье. Одинаковые на всех площадках, от 1 кг, круглосуточно.`;
+
+const ld = [
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [['Главная', '/'], ['Цены', path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: faq.map(([qn, a]) => ({ '@type': 'Question', name: qn, acceptedAnswer: { '@type': 'Answer', text: a } })),
+  },
+];
+---
+<Base page="prices" path={path} title={title} description={description} extraLd={ld}>
+  <Header />
+  <main id="main">
+    <section class="hero hero--yard hero--service">
+      <div class="hero__media" aria-hidden="true">
+        <svg class="hero__steel" preserveAspectRatio="none">
+          <filter id="steel" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.75" numOctaves="3" seed="11" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.55 0 0 0 -0.12" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#steel)" />
+        </svg>
+      </div>
+      <div class="wrap hero__in">
+        <nav class="crumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a><span aria-current="page">Цены</span>
+        </nav>
+        <h1 class="hero__title"><span class="hero__title-main">Цены на приём металлолома</span></h1>
+        <p class="hero__lead">Прайс на <time datetime={updatedISO}>{updatedText}</time>. Цены одинаковые на всех {yards.length} площадках, обновляем их, как только они меняются. Принимаем чёрный и цветной лом, макулатуру и пластик — от 1 кг, круглосуточно.</p>
+        <div class="hero__actions">
+          <a class="btn btn--accent btn--big hero__call" href={site.phone.href} data-goal="phone">
+            <span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span>
+          </a>
+          <a class="btn btn--line-light btn--big" href="#kalkulyator">Посчитать сумму</a>
+          <Chat variant="dark" />
+        </div>
+      </div>
+      <PriceBoard allHref="#prajs" />
+    </section>
+    <Terms />
+
+    <section class="section" id="prajs">
+      <div class="wrap">
+        <header class="section__head" data-reveal>
+          <h2>Прайс-лист</h2>
+          <p>Цены на <time datetime={updatedISO}>{updatedText}</time>. Смотрите на единицу: у чёрного лома цена за тонну, у остального — за килограмм. Итог считают после взвешивания и проверки засора.</p>
+        </header>
+        <nav class="pricenav" aria-label="Разделы прайса">
+          {groups.map((g) => <a href={`#${g.id}`}>{g.name}<small>{g.rows.length}</small></a>)}
+        </nav>
+        <div class="pricegrid">
+          {groups.map((g) => (
+            <section class="pricecat" id={g.id} aria-labelledby={`${g.id}-h`}>
+              <h3 id={`${g.id}-h`}>{g.name}</h3>
+              <table>
+                <thead><tr><th scope="col">Позиция</th><th scope="col">Цена</th></tr></thead>
+                <tbody>
+                  {g.rows.map((r) => (
+                    <tr class={typeof r.price === 'number' ? undefined : 'is-muted'}>
+                      <th scope="row">{r.name}</th>
+                      <td>{typeof r.price === 'number'
+                        ? <><b>{rub(r.price)}</b> {r.unit}</>
+                        : r.price === 'договорная'
+                          ? <a href={site.phone.href} data-goal="phone">договорная</a>
+                          : r.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))}
+        </div>
+        <p class="pricenote">Нет нужной позиции? Позвоните <a href={site.phone.href} data-goal="phone">{site.phone.text}</a> или пришлите фото лома в мессенджер — подскажем цену.</p>
+      </div>
+    </section>
+
+    <section class="section section--concrete" id="ot-chego-zavisit">
+      <div class="wrap">
+        <header class="section__head" data-reveal>
+          <h2>Что влияет на цену</h2>
+          <p>Цены на лом следуют за рынком металлов и меняются часто. Сумму на площадке определяют три вещи.</p>
+        </header>
+        <div class="conds">
+          <div class="cond" data-reveal>
+            <span class="cond__n">01</span>
+            <h3>Засор</h3>
+            <p>Земля, краска, масло, пластик и другие неметаллические части уменьшают итоговую сумму. Процент засора определяют при приёмке и обсуждают с вами прямо на площадке.</p>
+          </div>
+          <div class="cond" data-reveal>
+            <span class="cond__n">02</span>
+            <h3>Сортировка</h3>
+            <p>Чем чище и однороднее лом, тем выше цена.{sortExample}</p>
+          </div>
+          <div class="cond" data-reveal>
+            <span class="cond__n">03</span>
+            <h3>Объём</h3>
+            <p>Для меди и латуни от 100 кг и для партий с предприятий цена договорная. Позвоните — назовём цену на вашу партию.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Calculator title="Посчитайте сумму до поездки" />
+
+    <section class="section" id="voprosy">
+      <div class="wrap twocol">
+        <div class="askbox">
+          <h2>Вопросы о ценах</h2>
+          <p>Не нашли ответ? Позвоните или напишите — ответим сразу.</p>
+          <p class="twocol__actions">
+            <a class="btn btn--accent" href={site.phone.href} data-goal="phone"><span class="btn__label">Позвонить</span><span class="btn__num">{site.phone.text}</span></a>
+            <Chat variant="button" />
+          </p>
+        </div>
+        <div class="faq">
+          {faq.map(([q, a]) => <details><summary>{q}</summary><p>{a}</p></details>)}
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--concrete" id="ploshchadki">
+      <div class="wrap">
+        <header class="section__head" data-reveal>
+          <h2>Где сдать лом по этим ценам</h2>
+          <p>{yards.length} площадок в Подмосковье, все работают круглосуточно. Нажмите на адрес — откроется страница площадки с картой, маршрутом и телефоном.</p>
+        </header>
+        <ul class="yardlist yardlist--row yardlist--prices">
+          {yards.map((y) => (
+            <li class="yard" data-reveal>
+              <div class="yard__main">
+                <h3><a href={`/punkty-priema/${y.slug}`}>{y.name}</a></h3>
+                <p class="yard__addr"><a href={`/punkty-priema/${y.slug}`}>{y.address}</a></p>
+                <p class="yard__meta">
+                  <span class="open"><i class="dot" aria-hidden="true"></i>Круглосуточно</span>
+                  <a href={route(y)} target="_blank" rel="noopener" data-goal="route">Маршрут</a>
+                </p>
+              </div>
+              <div class="yard__call">
+                <a class="btn btn--accent" href={tel(y.phones[0])} data-goal="phone"><span class="btn__label">Позвонить</span><span class="btn__num">{y.phones[0]}</span></a>
+              </div>
+            </li>
+          ))}
+          <li class="yard yard--all" data-reveal>
+            <a href="/punkty-priema/"><b>Все площадки на карте</b><span>Схема, адреса и телефоны</span></a>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>
