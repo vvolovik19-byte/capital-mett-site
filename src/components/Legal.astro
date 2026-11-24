@@ -1,0 +1,37 @@
+---
+// Обёртка для юридических страниц (/politika, /soglasie): шапка, тёмная полоса с крошками и заголовком,
+// текст документа узкой колонкой, подвал. Реквизиты — src/data/site.json → requisites и legal.
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import site from '../data/site.json';
+
+interface Props { path: string; title: string; h1: string; description: string }
+const { path, title, h1, description } = Astro.props;
+const ld = [{
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: [['Главная', '/'], [h1, path]].map(([name, p], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site.url + p })),
+}];
+---
+<Base page="legal" path={path} title={title} description={description} extraLd={ld}>
+  <Header />
+  <main id="main">
+    <section class="legal-head">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a><span aria-current="page">{h1}</span>
+        </nav>
+        <h1>{h1}</h1>
+        <p class="legal-head__meta">{site.legalName} · Редакция от {site.legal.edition}</p>
+      </div>
+    </section>
+    <section class="section section--tight">
+      <div class="wrap">
+        <article class="legal">
+          <slot />
+        </article>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>

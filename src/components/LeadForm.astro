@@ -31,7 +31,9 @@ const what = { call: 'Что сдаёте (необязательно)', order: 
   {what && (
     <label class="field"><span>{what}</span><input id={`${id}-what`} name="what" type="text" /></label>
   )}
-  <label class="check"><input id={`${id}-agree`} name="agree" type="checkbox" required /><span>Согласен на <a href="/soglasie">обработку персональных данных</a> по <a href="/politika">политике</a></span></label>
+  <!-- Согласие — отдельная галочка (ч. 1 ст. 9 152-ФЗ в ред. 156-ФЗ), не отмечена по умолчанию; ссылки в новой вкладке, чтобы не терялись введённые данные -->
+  <label class="check"><input id={`${id}-agree`} name="agree" type="checkbox" required /><span>Даю <a href="/soglasie" target="_blank" rel="noopener">согласие на обработку персональных данных</a></span></label>
   <p class="form__msg" role="alert" hidden></p>
   <button class="btn btn--accent btn--big" type="submit">{submit}</button>
+  <p class="form__note">Отправляя форму, вы подтверждаете, что ознакомились с <a href="/politika" target="_blank" rel="noopener">Политикой обработки персональных данных</a>.</p>
 </form>
