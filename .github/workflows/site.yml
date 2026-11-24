@@ -88,18 +88,27 @@ jobs:
           SITE_NOINDEX: ${{ vars.SITE_NOINDEX }}
         run: npm run build
 
-      - name: Выложить на хостинг
+      # Выкладка по FTP (вход по SSH на хостинг RU-CENTER не заработал — сервер обрывает соединение). Пользователь FTP открывается сразу
+      # в папке сайта docs. Загружаются только изменённые файлы; удалённые из кода — удаляются и на хостинге.
+      # Список выложенного хранится на хостинге в .ftp-deploy-sync-state.json (из браузера закрыт в .htaccess).
+      # Файл zayavka-config.php и журнал заявок лежат уровнем выше docs — выкладка их не видит и не трогает.
+      - name: Проверить настройки хостинга
+        id: ftp
         env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
         run: |
-          if [ -z "$SSH_HOST" ]; then echo "Хостинг ещё не настроен (нет секрета SSH_HOST) — выкладку пропускаю."; exit 0; fi
-          case "$DEPLOY_PATH" in ""|"/"|"~"|"~/") echo "DEPLOY_PATH не задан или опасен"; exit 1;; esac
-          mkdir -p ~/.ssh && echo "$SSH_KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          # Сервер RU-CENTER предлагает только старый тип ключа ssh-rsa — новые версии SSH его по умолчанию отключают
-          SSH_OPTS="-o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa"
-          ssh-keyscan -t rsa -p "${SSH_PORT:-22}" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          rsync -az --delete -e "ssh -i ~/.ssh/deploy -p ${SSH_PORT:-22} $SSH_OPTS" dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+          if [ -z "$FTP_HOST" ]; then echo "Хостинг ещё не настроен (нет секрета FTP_HOST) — выкладку пропускаю."; echo "on=false" >> "$GITHUB_OUTPUT"
+          else echo "on=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Выложить на хостинг по FTP
+        if: steps.ftp.outputs.on == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@3a9c65ae0fc12ac924ccef8afc26941cc43aad0b # v4.4.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          security: loose   # сертификат FTP-сервера RU-CENTER выписан на другое имя; шифрование остаётся
+          local-dir: ./dist/
+          server-dir: ./
+          timeout: 120000

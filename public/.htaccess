@@ -2,6 +2,11 @@
 Options -MultiViews
 RewriteEngine On
 
+# Служебный список файлов автоматической выкладки — из браузера не открывается
+<Files ".ftp-deploy-sync-state.json">
+  Require all denied
+</Files>
+
 # 301 со старых адресов услуг. Страницы районов вывоза ведут на общую страницу самовывоза;
 # остальные старые адреса районов добавлять сюда же, по строке на адрес.
 RewriteRule ^uslugi/samovyvoz-orig(\.html)?/?$ /uslugi/samovyvoz [R=301,L]
